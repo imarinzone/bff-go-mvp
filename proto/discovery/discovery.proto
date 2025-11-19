@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package discovery;
+
+option go_package = "bff-go-mvp/proto/discovery/gen;discovery";
+
+// Discovery service definition
+service DiscoveryService {
+  rpc Discover(DiscoveryRequest) returns (DiscoveryResponse);
+}
+
+// Discovery request matching the JSON structure
+message DiscoveryRequest {
+  Context context = 1;
+  Message message = 2;
+}
+
+message Context {
+  string version = 1;
+  string action = 2;
+  string domain = 3;
+  Location location = 4;
+  string bap_id = 5;
+  string bap_uri = 6;
+  string bpp_id = 7;
+  string bpp_uri = 8;
+  string transaction_id = 9;
+  string message_id = 10;
+  string timestamp = 11;
+  string ttl = 12;
+  repeated string schema_context = 13;
+}
+
+message Location {
+  Country country = 1;
+  City city = 2;
+}
+
+message Country {
+  string code = 1;
+}
+
+message City {
+  string code = 1;
+}
+
+message Message {
+  repeated Catalog catalogs = 1;
+}
+
+message Catalog {
+  string context = 1;
+  string type = 2;
+  Descriptor descriptor = 3;
+  Provider provider = 4;
+  repeated Item items = 5;
+}
+
+message Descriptor {
+  string name = 1;
+  string short_desc = 2;
+}
+
+message Provider {
+  string context = 1;
+  string type = 2;
+  string id = 3;
+  Descriptor descriptor = 4;
+  Address address = 5;
+  repeated Contact contact = 6;
+}
+
+message Address {
+  string area_code = 1;
+  City city = 2;
+  State state = 3;
+  Country country = 4;
+  string full = 5;
+}
+
+message State {
+  string code = 1;
+}
+
+message Contact {
+  string phone = 1;
+  string email = 2;
+}
+
+message Item {
+  string context = 1;
+  string type = 2;
+  string id = 3;
+  Descriptor descriptor = 4;
+  Category category = 5;
+  map<string, string> item_attributes = 6;
+  repeated LocationItem available_at = 7;
+  repeated Offer offers = 8;
+  Rating rating = 9;
+}
+
+message Category {
+  string type = 1;
+  string id = 2;
+  Descriptor descriptor = 3;
+}
+
+message LocationItem {
+  string type = 1;
+  Geo geo = 2;
+  Address address = 3;
+}
+
+message Geo {
+  string type = 1;
+  repeated double coordinates = 2;
+}
+
+message Offer {
+  string context = 1;
+  string type = 2;
+  string id = 3;
+  Descriptor descriptor = 4;
+  Price price = 5;
+  Validity validity = 6;
+  repeated string accepted_payment_method = 7;
+  map<string, string> offer_attributes = 8;
+}
+
+message Price {
+  string currency = 1;
+  double value = 2;
+  ApplicableQuantity applicable_quantity = 3;
+}
+
+message ApplicableQuantity {
+  string unit_text = 1;
+  string unit_code = 2;
+  int32 unit_quantity = 3;
+}
+
+message Validity {
+  string type = 1;
+  string start_date = 2;
+  string end_date = 3;
+}
+
+message Rating {
+  double value = 1;
+  int32 count = 2;
+}
+
+// Discovery response
+message DiscoveryResponse {
+  Context context = 1;
+  Message message = 2;
+}
+
+

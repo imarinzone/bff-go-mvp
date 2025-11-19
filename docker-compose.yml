@@ -1,0 +1,88 @@
+services:
+  temporal:
+    image: temporalio/auto-setup:latest
+    container_name: temporal
+    ports:
+      - "7233:7233"
+      - "8088:8088"
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=postgresql
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
+    volumes:
+      - temporal-data:/var/lib/temporal
+    networks:
+      - bff-network
+    healthcheck:
+      test: ["CMD", "tctl", "--address", "localhost:7233", "cluster", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgresql:
+    image: postgres:15-alpine
+    container_name: temporal-postgresql
+    environment:
+      - POSTGRES_PASSWORD=temporal
+      - POSTGRES_USER=temporal
+      - POSTGRES_DB=temporal
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - bff-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: bff-api
+    ports:
+      - "8080:8080"
+    environment:
+      - ENV=production
+      - TEMPORAL_HOST=temporal:7233
+      - TEMPORAL_NAMESPACE=default
+      - TEMPORAL_TASK_QUEUE=DISCOVERY_TASK_QUEUE
+      - GRPC_SERVICE_ADDRESS=localhost:50051
+      - API_PORT=8080
+    depends_on:
+      temporal:
+        condition: service_healthy
+    networks:
+      - bff-network
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: bff-worker
+    environment:
+      - ENV=production
+      - TEMPORAL_HOST=temporal:7233
+      - TEMPORAL_NAMESPACE=default
+      - TEMPORAL_TASK_QUEUE=DISCOVERY_TASK_QUEUE
+      - GRPC_SERVICE_ADDRESS=localhost:50051
+    depends_on:
+      temporal:
+        condition: service_healthy
+    networks:
+      - bff-network
+    restart: unless-stopped
+
+networks:
+  bff-network:
+    driver: bridge
+
+volumes:
+  temporal-data:
+  postgres-data:
+
