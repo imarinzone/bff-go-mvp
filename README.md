@@ -31,7 +31,7 @@ bff-go-mvp/
 ## Prerequisites
 
 ### For Local Development
-- Go 1.21 or higher
+- Go 1.24 or higher
 - Temporal server running (default: localhost:7233)
 - Protocol Buffers compiler (`protoc`) - for generating code from `.proto` files
 - Go protobuf plugins:
