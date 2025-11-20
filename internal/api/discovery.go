@@ -1,38 +1,28 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"go.temporal.io/sdk/client"
 	"go.uber.org/zap"
 
-	"bff-go-mvp/internal/temporal"
+	"bff-go-mvp/internal/grpc"
 	"bff-go-mvp/pkg/models"
 )
 
-// TemporalWorkflowExecutor is an interface for executing Temporal workflows
-type TemporalWorkflowExecutor interface {
-	ExecuteWorkflow(ctx context.Context, options client.StartWorkflowOptions, workflow interface{}, args ...interface{}) (client.WorkflowRun, error)
-}
-
 // DiscoveryHandler handles discovery API requests
 type DiscoveryHandler struct {
-	workflowExecutor TemporalWorkflowExecutor
-	serviceAddress   string
-	taskQueue        string
-	logger           *zap.Logger
+	grpcClient     *grpc.Client
+	logger         *zap.Logger
+	serviceAddress string
 }
 
 // NewDiscoveryHandler creates a new discovery handler
-func NewDiscoveryHandler(workflowExecutor TemporalWorkflowExecutor, serviceAddress, taskQueue string, logger *zap.Logger) *DiscoveryHandler {
+func NewDiscoveryHandler(serviceAddress string, logger *zap.Logger) *DiscoveryHandler {
 	return &DiscoveryHandler{
-		workflowExecutor: workflowExecutor,
-		serviceAddress:   serviceAddress,
-		taskQueue:        taskQueue,
-		logger:           logger,
+		serviceAddress: serviceAddress,
+		logger:         logger,
 	}
 }
 
@@ -59,51 +49,28 @@ func (h *DiscoveryHandler) HandleDiscovery(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Generate workflow ID
-	workflowID := fmt.Sprintf("discovery-%s-%s", req.Context.TransactionID, req.Context.MessageID)
-
 	h.logger.Info("Processing discovery request",
-		zap.String("workflow_id", workflowID),
 		zap.String("transaction_id", req.Context.TransactionID),
 		zap.String("message_id", req.Context.MessageID),
 	)
 
-	// Prepare workflow input
-	workflowInput := temporal.DiscoveryWorkflowInput{
-		Request:        req,
-		ServiceAddress: h.serviceAddress,
-	}
+	// Create gRPC client and call discovery service
+	grpcClient := grpc.NewClient(h.serviceAddress)
+	defer grpcClient.Close()
 
-	// Execute Temporal workflow
-	workflowOptions := client.StartWorkflowOptions{
-		ID:        workflowID,
-		TaskQueue: h.taskQueue,
-	}
-
-	we, err := h.workflowExecutor.ExecuteWorkflow(r.Context(), workflowOptions, temporal.DiscoveryWorkflow, workflowInput)
+	result, err := grpcClient.CallDiscoveryService(r.Context(), &req)
 	if err != nil {
-		h.logger.Error("Failed to start workflow",
+		h.logger.Error("Failed to call discovery service",
 			zap.Error(err),
-			zap.String("workflow_id", workflowID),
+			zap.String("transaction_id", req.Context.TransactionID),
 		)
-		http.Error(w, fmt.Sprintf("Failed to start workflow: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	// Get workflow result
-	var result models.DiscoveryResponse
-	if err := we.Get(r.Context(), &result); err != nil {
-		h.logger.Error("Workflow execution failed",
-			zap.Error(err),
-			zap.String("workflow_id", workflowID),
-		)
-		http.Error(w, fmt.Sprintf("Workflow execution failed: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Failed to call discovery service: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	h.logger.Info("Discovery request completed successfully",
-		zap.String("workflow_id", workflowID),
 		zap.String("transaction_id", req.Context.TransactionID),
+		zap.String("message_id", req.Context.MessageID),
 	)
 
 	// Return JSON response
@@ -111,7 +78,7 @@ func (h *DiscoveryHandler) HandleDiscovery(w http.ResponseWriter, r *http.Reques
 	if err := json.NewEncoder(w).Encode(result); err != nil {
 		h.logger.Error("Failed to encode response",
 			zap.Error(err),
-			zap.String("workflow_id", workflowID),
+			zap.String("transaction_id", req.Context.TransactionID),
 		)
 		http.Error(w, fmt.Sprintf("Failed to encode response: %v", err), http.StatusInternalServerError)
 		return

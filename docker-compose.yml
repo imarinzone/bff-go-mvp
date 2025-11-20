@@ -2,53 +2,42 @@ version: "0.1"
 services:
   temporal:
     image: temporalio/auto-setup:latest
-    environment:
-      - DB=postgres12
-      - POSTGRES_USER=temporal
-      - POSTGRES_PWD=temporal
-      - POSTGRES_DB=temporal
-      - POSTGRES_SEEDS=postgres
-      - DB_PORT=5432
+    container_name: temporal
     ports:
       - "7233:7233"
+      - "8088:8088"
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=postgresql
+    volumes:
+      - temporal-data:/var/lib/temporal
+    networks:
+      - bff-network
     healthcheck:
       test: ["CMD", "tctl", "--address", "localhost:7233", "cluster", "health"]
       interval: 10s
       timeout: 5s
       retries: 5
-    depends_on:
-      - postgres
-    networks:
-      - bff-network
 
-  postgres:
-    image: postgres:12
+  postgresql:
+    image: postgres:15-alpine
+    container_name: temporal-postgresql
     environment:
-      - POSTGRES_USER=temporal
       - POSTGRES_PASSWORD=temporal
+      - POSTGRES_USER=temporal
       - POSTGRES_DB=temporal
     volumes:
-      - temporal_pgdata:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - bff-network
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "temporal"]
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
       interval: 5s
       timeout: 5s
-      retries: 10
-    networks:
-      - bff-network
-
-  temporal-ui:
-    container_name: temporal-ui
-    depends_on:
-      - temporal
-    environment:
-      - TEMPORAL_ADDRESS=temporal:7233
-      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
-    image: temporalio/ui:latest
-    networks:
-      - bff-network
-    ports:
-      - 8080:8080
+      retries: 5
 
   api:
     build:
@@ -59,11 +48,11 @@ services:
       - "8000:8000"
     environment:
       - ENV=production
-      - TEMPORAL_HOST=temporal:7233
-      - TEMPORAL_NAMESPACE=default
-      - TEMPORAL_TASK_QUEUE=DISCOVERY_TASK_QUEUE
       - GRPC_SERVICE_ADDRESS=localhost:50051
-      - API_PORT=8000
+      - API_PORT=8080
+    depends_on:
+      temporal:
+        condition: service_healthy
     networks:
       - bff-network
     restart: unless-stopped
@@ -79,6 +68,9 @@ services:
       - TEMPORAL_NAMESPACE=default
       - TEMPORAL_TASK_QUEUE=DISCOVERY_TASK_QUEUE
       - GRPC_SERVICE_ADDRESS=localhost:50051
+    depends_on:
+      temporal:
+        condition: service_healthy
     networks:
       - bff-network
     restart: unless-stopped
@@ -88,4 +80,6 @@ networks:
     driver: bridge
 
 volumes:
-  temporal_pgdata:
+  temporal-data:
+  postgres-data:
+

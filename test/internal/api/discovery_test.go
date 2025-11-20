@@ -2,53 +2,17 @@ package api_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"go.temporal.io/sdk/client"
 	"go.uber.org/zap"
 
 	"bff-go-mvp/internal/api"
 	"bff-go-mvp/pkg/models"
 )
-
-// MockWorkflowExecutor is a mock implementation of TemporalWorkflowExecutor
-type MockWorkflowExecutor struct {
-	mock.Mock
-}
-
-func (m *MockWorkflowExecutor) ExecuteWorkflow(ctx context.Context, options client.StartWorkflowOptions, workflow interface{}, args ...interface{}) (client.WorkflowRun, error) {
-	args_m := m.Called(ctx, options, workflow, args)
-	return args_m.Get(0).(client.WorkflowRun), args_m.Error(1)
-}
-
-// MockWorkflowRun is a mock implementation of WorkflowRun
-type MockWorkflowRun struct {
-	mock.Mock
-	client.WorkflowRun
-}
-
-func (m *MockWorkflowRun) Get(ctx context.Context, valuePtr interface{}) error {
-	args := m.Called(ctx, valuePtr)
-	// Set the value if provided
-	if resp, ok := valuePtr.(*models.DiscoveryResponse); ok {
-		*resp = args.Get(0).(models.DiscoveryResponse)
-	}
-	return args.Error(1)
-}
-
-func (m *MockWorkflowRun) GetID() string {
-	return "test-workflow-id"
-}
-
-func (m *MockWorkflowRun) GetRunID() string {
-	return "test-run-id"
-}
 
 func TestDiscoveryHandler_HandleDiscovery(t *testing.T) {
 	// Create mock request
@@ -67,21 +31,11 @@ func TestDiscoveryHandler_HandleDiscovery(t *testing.T) {
 
 	jsonBody, _ := json.Marshal(reqBody)
 
-	// Create mock workflow executor
-	mockExecutor := new(MockWorkflowExecutor)
-	mockWorkflowRun := new(MockWorkflowRun)
-
-	expectedResponse := models.DiscoveryResponse{
-		Context: reqBody.Context,
-		Message: reqBody.Message,
-	}
-
-	mockWorkflowRun.On("Get", mock.Anything, mock.Anything).Return(expectedResponse, nil)
-	mockExecutor.On("ExecuteWorkflow", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(mockWorkflowRun, nil)
-
-	// Create handler with no-op logger for testing
+	// Since we can't easily mock the grpc.NewClient call in the handler,
+	// we'll test with the actual implementation which uses a mock response
+	// In a real scenario, you might want to refactor to inject the gRPC client
 	logger := zap.NewNop()
-	handler := api.NewDiscoveryHandler(mockExecutor, "localhost:50051", "TEST_QUEUE", logger)
+	handler := api.NewDiscoveryHandler("localhost:50051", logger)
 
 	// Create HTTP request
 	req := httptest.NewRequest(http.MethodPost, "/discovery", bytes.NewBuffer(jsonBody))
@@ -99,15 +53,11 @@ func TestDiscoveryHandler_HandleDiscovery(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &resp)
 	assert.NoError(t, err)
 	assert.Equal(t, reqBody.Context.TransactionID, resp.Context.TransactionID)
-
-	mockExecutor.AssertExpectations(t)
-	mockWorkflowRun.AssertExpectations(t)
 }
 
 func TestDiscoveryHandler_HandleDiscovery_InvalidMethod(t *testing.T) {
-	mockExecutor := new(MockWorkflowExecutor)
 	logger := zap.NewNop()
-	handler := api.NewDiscoveryHandler(mockExecutor, "localhost:50051", "TEST_QUEUE", logger)
+	handler := api.NewDiscoveryHandler("localhost:50051", logger)
 
 	req := httptest.NewRequest(http.MethodGet, "/discovery", nil)
 	w := httptest.NewRecorder()
@@ -118,9 +68,8 @@ func TestDiscoveryHandler_HandleDiscovery_InvalidMethod(t *testing.T) {
 }
 
 func TestDiscoveryHandler_HandleDiscovery_InvalidJSON(t *testing.T) {
-	mockExecutor := new(MockWorkflowExecutor)
 	logger := zap.NewNop()
-	handler := api.NewDiscoveryHandler(mockExecutor, "localhost:50051", "TEST_QUEUE", logger)
+	handler := api.NewDiscoveryHandler("localhost:50051", logger)
 
 	req := httptest.NewRequest(http.MethodPost, "/discovery", bytes.NewBufferString("invalid json"))
 	w := httptest.NewRecorder()
