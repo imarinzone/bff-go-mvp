@@ -27,7 +27,7 @@ func main() {
 	cfg := config.Load()
 
 	// Create Temporal client
-	temporalClient, err := client.NewClient(client.Options{
+	temporalClient, err := client.Dial(client.Options{
 		HostPort:  cfg.Temporal.Host,
 		Namespace: cfg.Temporal.Namespace,
 	})
@@ -72,4 +72,3 @@ func main() {
 		zapLogger.Fatal("Worker failed", zap.Error(err))
 	}
 }
-

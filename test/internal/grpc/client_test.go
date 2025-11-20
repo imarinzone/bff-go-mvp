@@ -1,14 +1,15 @@
-package grpc
+package grpc_test
 
 import (
 	"context"
 	"testing"
 
+	"bff-go-mvp/internal/grpc"
 	"bff-go-mvp/pkg/models"
 )
 
 func TestClient_CallDiscoveryService(t *testing.T) {
-	client := NewClient("localhost:50051")
+	client := grpc.NewClient("localhost:50051")
 
 	req := &models.DiscoveryRequest{
 		Context: models.Context{
@@ -39,10 +40,9 @@ func TestClient_CallDiscoveryService(t *testing.T) {
 }
 
 func TestClient_Close(t *testing.T) {
-	client := NewClient("localhost:50051")
+	client := grpc.NewClient("localhost:50051")
 	err := client.Close()
 	if err != nil {
 		t.Errorf("Close() should not return an error: %v", err)
 	}
 }
-

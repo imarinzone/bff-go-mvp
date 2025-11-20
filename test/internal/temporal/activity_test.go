@@ -1,9 +1,10 @@
-package temporal
+package temporal_test
 
 import (
 	"context"
 	"testing"
 
+	"bff-go-mvp/internal/temporal"
 	"bff-go-mvp/pkg/models"
 )
 
@@ -24,7 +25,7 @@ func TestCallDiscoveryActivity(t *testing.T) {
 	serviceAddress := "localhost:50051"
 	ctx := context.Background()
 
-	resp, err := CallDiscoveryActivity(ctx, req, serviceAddress)
+	resp, err := temporal.CallDiscoveryActivity(ctx, req, serviceAddress)
 	if err != nil {
 		t.Fatalf("CallDiscoveryActivity failed: %v", err)
 	}
@@ -33,4 +34,3 @@ func TestCallDiscoveryActivity(t *testing.T) {
 		t.Errorf("Expected transaction ID %s, got %s", req.Context.TransactionID, resp.Context.TransactionID)
 	}
 }
-

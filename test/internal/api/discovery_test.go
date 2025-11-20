@@ -1,4 +1,4 @@
-package api
+package api_test
 
 import (
 	"bytes"
@@ -13,6 +13,7 @@ import (
 	"go.temporal.io/sdk/client"
 	"go.uber.org/zap"
 
+	"bff-go-mvp/internal/api"
 	"bff-go-mvp/pkg/models"
 )
 
@@ -80,7 +81,7 @@ func TestDiscoveryHandler_HandleDiscovery(t *testing.T) {
 
 	// Create handler with no-op logger for testing
 	logger := zap.NewNop()
-	handler := NewDiscoveryHandler(mockExecutor, "localhost:50051", "TEST_QUEUE", logger)
+	handler := api.NewDiscoveryHandler(mockExecutor, "localhost:50051", "TEST_QUEUE", logger)
 
 	// Create HTTP request
 	req := httptest.NewRequest(http.MethodPost, "/discovery", bytes.NewBuffer(jsonBody))
@@ -106,7 +107,7 @@ func TestDiscoveryHandler_HandleDiscovery(t *testing.T) {
 func TestDiscoveryHandler_HandleDiscovery_InvalidMethod(t *testing.T) {
 	mockExecutor := new(MockWorkflowExecutor)
 	logger := zap.NewNop()
-	handler := NewDiscoveryHandler(mockExecutor, "localhost:50051", "TEST_QUEUE", logger)
+	handler := api.NewDiscoveryHandler(mockExecutor, "localhost:50051", "TEST_QUEUE", logger)
 
 	req := httptest.NewRequest(http.MethodGet, "/discovery", nil)
 	w := httptest.NewRecorder()
@@ -119,7 +120,7 @@ func TestDiscoveryHandler_HandleDiscovery_InvalidMethod(t *testing.T) {
 func TestDiscoveryHandler_HandleDiscovery_InvalidJSON(t *testing.T) {
 	mockExecutor := new(MockWorkflowExecutor)
 	logger := zap.NewNop()
-	handler := NewDiscoveryHandler(mockExecutor, "localhost:50051", "TEST_QUEUE", logger)
+	handler := api.NewDiscoveryHandler(mockExecutor, "localhost:50051", "TEST_QUEUE", logger)
 
 	req := httptest.NewRequest(http.MethodPost, "/discovery", bytes.NewBufferString("invalid json"))
 	w := httptest.NewRecorder()

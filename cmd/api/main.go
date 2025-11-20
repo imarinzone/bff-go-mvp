@@ -30,7 +30,7 @@ func main() {
 	cfg := config.Load()
 
 	// Create Temporal client
-	temporalClient, err := client.NewClient(client.Options{
+	temporalClient, err := client.Dial(client.Options{
 		HostPort:  cfg.Temporal.Host,
 		Namespace: cfg.Temporal.Namespace,
 	})
@@ -49,7 +49,7 @@ func main() {
 
 	// Setup router
 	r := mux.NewRouter()
-	
+
 	// Middleware for logging
 	r.Use(loggingMiddleware(zapLogger))
 	r.Use(recoveryMiddleware(zapLogger))

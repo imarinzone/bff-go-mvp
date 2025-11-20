@@ -1,8 +1,10 @@
-package config
+package config_test
 
 import (
 	"os"
 	"testing"
+
+	"bff-go-mvp/internal/config"
 )
 
 func TestLoad(t *testing.T) {
@@ -43,7 +45,7 @@ func TestLoad(t *testing.T) {
 	}()
 
 	// Test with defaults
-	cfg := Load()
+	cfg := config.Load()
 	if cfg.Temporal.Host != "localhost:7233" {
 		t.Errorf("Expected default Temporal host 'localhost:7233', got '%s'", cfg.Temporal.Host)
 	}
@@ -64,7 +66,7 @@ func TestLoad(t *testing.T) {
 	os.Setenv("GRPC_SERVICE_ADDRESS", "custom-grpc:50052")
 	os.Setenv("API_PORT", "9090")
 
-	cfg = Load()
+	cfg = config.Load()
 	if cfg.Temporal.Host != "custom-host:7234" {
 		t.Errorf("Expected Temporal host 'custom-host:7234', got '%s'", cfg.Temporal.Host)
 	}
@@ -81,4 +83,3 @@ func TestLoad(t *testing.T) {
 		t.Errorf("Expected API port '9090', got '%s'", cfg.API.Port)
 	}
 }
-
