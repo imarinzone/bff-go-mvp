@@ -16,7 +16,7 @@ Search for available EV charging connectors and offers near a location or by spe
 | **Header Name** | **Data Type** | **Mandatory** | **Description** |
 |-----------------|---------------|---------------|-----------------|
 | Authorization | String | Yes | Bearer token for authentication |
-| X-Transaction-Id | String | No | Transaction identifier for request tracking (auto-generated if not provided) |
+| X-Transaction-Id | String | Yes | Transaction identifier for request tracking |
 
 **Query Parameters:**
 
@@ -37,8 +37,9 @@ Search for available EV charging connectors and offers near a location or by spe
 | time_window.end | String (DateTime) | No | End date and time |
 | filters | Object | No | Additional search filters |
 | filters.cpo | String | No | Charge Point Operator identifier |
-| filters.station | String | No | Charging station identifier |
-| filters.connector_type | String | No | Type of connector (TYPE_1, TYPE_2, CCS2) |
+| filters.connector_type | String | No | Type of connector (TYPE_1, TYPE_2) |
+| filters.max_power_kw | Number | No | Minimum maximum power in kilowatts (filters connectors with maxPowerKW >= this value) |
+| filters.amenities | Array[String] | No | List of required amenities (filters connectors that have all specified amenities, e.g., Restaurant, Restroom, Wi-Fi, Parking) |
 | filters.vehicle | Object | No | Vehicle information |
 | filters.vehicle.make | String | No | Vehicle manufacturer |
 | filters.vehicle.model | String | No | Vehicle model |
@@ -57,7 +58,9 @@ Search for available EV charging connectors and offers near a location or by spe
     "end": "2025-12-02T18:00:00Z"
   },
   "filters": {
-    "connector_type": "CCS2",
+    "connector_type": "TYPE_2",
+    "max_power_kw": 50,
+    "amenities": ["Restaurant", "Restroom", "Wi-Fi"],
     "vehicle": {
       "type": "4-wheeler",
       "make": "Tesla",
@@ -66,6 +69,12 @@ Search for available EV charging connectors and offers near a location or by spe
   }
 }
 ```
+
+**Response Headers:**
+
+| **Header Name** | **Data Type** | **Mandatory** | **Description** |
+|-----------------|---------------|---------------|-----------------|
+| X-Transaction-Id | String | Yes | Transaction identifier for request tracking |
 
 **Response Payload:**
 
@@ -76,20 +85,30 @@ Search for available EV charging connectors and offers near a location or by spe
 | per_page | Integer | Yes | Number of items per page |
 | catalogs | Array[Object] | Yes | List of catalogs containing connectors and offers |
 | catalogs[].id | String | Yes | Unique catalog identifier |
+| catalogs[].provider | Object | Yes | Provider information |
+| catalogs[].provider.id | String | Yes | Provider identifier |
+| catalogs[].provider.descriptor | Object | Yes | Provider descriptor |
+| catalogs[].provider.descriptor.name | String | Yes | Provider name (station name) |
+| catalogs[].provider.address | Object | Yes | Address information |
+| catalogs[].provider.address.name | String | Yes | Address name/location |
+| catalogs[].provider.address.geo_coordinates | Array[Number] | Yes | [latitude, longitude] |
+| catalogs[].rating | Object | Yes | User rating information |
+| catalogs[].rating.value | Number | Yes | Average rating value |
+| catalogs[].rating.count | Integer | Yes | Number of ratings |
 | catalogs[].connectors | Array[Object] | Yes | List of charging connectors |
-| catalogs[].connectors[].id | String | Yes | Unique connector identifier |
-| catalogs[].connectors[].geo_coordinates | Array[Number] | Yes | [latitude, longitude] |
-| catalogs[].connectors[].availabilityWindow | Array[Object] | Yes | Time windows when connector is available |
-| catalogs[].connectors[].rating | Object | Yes | User rating information |
-| catalogs[].connectors[].rating.value | Number | Yes | Average rating value |
-| catalogs[].connectors[].rating.count | Integer | Yes | Number of ratings |
+| catalogs[].connectors[].id | String | Yes | Unique connector identifier (name) |
 | catalogs[].connectors[].isActive | Boolean | Yes | Whether connector is currently active |
-| catalogs[].connectors[].provider | Object | Yes | Provider information |
+| catalogs[].connectors[].availabilityWindow | Array[Object] | Yes | Operating hours - time windows when connector is available |
 | catalogs[].connectors[].connectorAttributes | Object | Yes | Technical attributes of the connector |
-| catalogs[].connectors[].connectorAttributes.connectorType | String | Yes | Type (CCS2, Type2, Type1) |
-| catalogs[].connectors[].connectorAttributes.maxPowerKW | Number | Yes | Maximum power in kilowatts |
+| catalogs[].connectors[].connectorAttributes.connectorType | String | Yes | Type (TYPE_1, TYPE_2) |
+| catalogs[].connectors[].connectorAttributes.maxPowerKW | Number | Yes | Maximum power in kilowatts (power) |
+| catalogs[].connectors[].connectorAttributes.minPowerKW | Number | Yes | Minimum power in kilowatts |
+| catalogs[].connectors[].connectorAttributes.socketCount | Integer | Yes | Number of sockets available |
+| catalogs[].connectors[].connectorAttributes.reservationSupported | Boolean | Yes | Whether reservations are supported |
 | catalogs[].connectors[].connectorAttributes.status | String | Yes | Available, Occupied, Reserved, OutOfOrder |
-| catalogs[].connectors[].connectorAttributes.chargingSpeed | String | Yes | SLOW, NORMAL, FAST, ULTRAFAST |
+| catalogs[].connectors[].connectorAttributes.chargingSpeed | String | Yes | SLOW, NORMAL, FAST |
+| catalogs[].connectors[].connectorAttributes.powerType | String | Yes | Charger type (AC, DC) |
+| catalogs[].connectors[].connectorAttributes.connectorFormat | String | Yes | CABLE, OTHERS |
 | catalogs[].offers | Array[Object] | Yes | List of pricing offers |
 
 **Example Response JSON (Success):**
@@ -102,29 +121,32 @@ Search for available EV charging connectors and offers near a location or by spe
   "catalogs": [
     {
       "id": "catalog-ev-charging-001",
+      "provider": {
+        "id": "ecopower-charging",
+        "descriptor": {
+          "name": "EcoPower Charging Pvt Ltd"
+        },
+        "address": {
+          "name": "MG JVLR Jogeshwari Caves Road",
+          "geo_coordinates": [12.9716, 77.5946]
+        }
+      },
+      "rating": {
+        "value": 4.5,
+        "count": 128
+      },
       "connectors": [
         {
           "id": "ev-charger-ccs2-001",
-          "geo_coordinates": [12.9716, 77.5946],
+          "isActive": true,
           "availabilityWindow": [
             {
               "startTime": "06:00:00",
               "endTime": "22:00:00"
             }
           ],
-          "rating": {
-            "value": 4.5,
-            "count": 128
-          },
-          "isActive": true,
-          "provider": {
-            "id": "ecopower-charging",
-            "descriptor": {
-              "name": "EcoPower Charging Pvt Ltd"
-            }
-          },
           "connectorAttributes": {
-            "connectorType": "CCS2",
+            "connectorType": "TYPE_2",
             "maxPowerKW": 60,
             "minPowerKW": 5,
             "socketCount": 2,
@@ -179,7 +201,6 @@ Get cost and time estimates for a prospective charging session based on vehicle,
 |-----------------|---------------|---------------|-----------------|
 | Authorization | String | Yes | Bearer token for authentication |
 | X-Transaction-Id | String | Yes | Transaction identifier for request tracking |
-| X-Bpp-Id | String | Yes | Backend provider platform identifier |
 
 **Request Payload:**
 
@@ -228,6 +249,13 @@ Get cost and time estimates for a prospective charging session based on vehicle,
   "offer_id": "offer-ccs2-60kw-kwh"
 }
 ```
+
+**Response Headers:**
+
+| **Header Name** | **Data Type** | **Mandatory** | **Description** |
+|-----------------|---------------|---------------|-----------------|
+| X-Transaction-Id | String | Yes | Transaction identifier for request tracking |
+| X-Bpp-Id | String | Yes | BPP identifier |
 
 **Response Payload:**
 
@@ -351,6 +379,13 @@ Initiate or fetch payment instructions for the specified order after getting est
 |----------|---------------|---------------|-----------------|
 | payment_method | String | No | Preferred payment method (UPI, Card, Wallet, BankTransfer) |
 
+**Response Headers:**
+
+| **Header Name** | **Data Type** | **Mandatory** | **Description** |
+|-----------------|---------------|---------------|-----------------|
+| X-Transaction-Id | String | Yes | Transaction identifier for request tracking |
+| X-Bpp-Id | String | Yes | BPP identifier |
+
 **Response Payload:**
 
 | **Name** | **Data Type** | **Mandatory** | **Description** |
@@ -359,11 +394,12 @@ Initiate or fetch payment instructions for the specified order after getting est
 | order.id | String | Yes | Order identifier |
 | order.status | String | Yes | Order status (ACTIVE) |
 | order.mode | String | Yes | Order mode (RESERVATION) |
-| currency | String | Yes | Currency code |
-| amount | Number | Yes | Total payment amount |
-| benificiary_id | String | No | Beneficiary identifier |
+| amount | Object | Yes | Total payment amount |
+| amount.value | Number | Yes | Amount value |
+| amount.currency | String | Yes | Currency code (ISO 4217) |
+| beneficiaryId | String | No | Beneficiary identifier |
 | acceptedPaymentMethod | Array[String] | Yes | List of accepted payment methods |
-| payment_url | String | No | URL for payment gateway (if applicable) |
+| paymentUrl | String | No | URL for payment gateway (if applicable) |
 | validity | Object | Yes | Payment validity period |
 
 **Example Response JSON (Success):**
@@ -375,11 +411,13 @@ Initiate or fetch payment instructions for the specified order after getting est
     "status": "ACTIVE",
     "mode": "RESERVATION"
   },
-  "currency": "INR",
-  "amount": 128.64,
-  "benificiary_id": "",
+  "amount": {
+    "value": 128.64,
+    "currency": "INR"
+  },
+  "beneficiaryId": "",
   "acceptedPaymentMethod": ["BankTransfer", "UPI", "Wallet"],
-  "payment_url": "",
+  "paymentUrl": "",
   "validity": {
     "startDate": "2025-12-02T14:00:00Z",
     "endDate": "2025-12-02T18:00:00Z"
@@ -416,6 +454,13 @@ Retrieve order details, current status, and real-time telemetry for the specifie
 
 **Request Payload:**
 None (GET request)
+
+**Response Headers:**
+
+| **Header Name** | **Data Type** | **Mandatory** | **Description** |
+|-----------------|---------------|---------------|-----------------|
+| X-Transaction-Id | String | Yes | Transaction identifier for request tracking |
+| X-Bpp-Id | String | Yes | BPP identifier |
 
 **Response Payload:**
 
@@ -456,7 +501,7 @@ None (GET request)
     "status": "ACTIVE"
   },
   "connectorId": "ev-charger-ccs2-001",
-  "connectorType": "CCS2",
+  "connectorType": "TYPE_2",
   "vehicle": {
     "type": "4-wheeler",
     "model": "Model 3",
@@ -531,6 +576,13 @@ Start a charging session for an existing order.
 **Request Payload:**
 None
 
+**Response Headers:**
+
+| **Header Name** | **Data Type** | **Mandatory** | **Description** |
+|-----------------|---------------|---------------|-----------------|
+| X-Transaction-Id | String | Yes | Transaction identifier for request tracking |
+| X-Bpp-Id | String | Yes | BPP identifier |
+
 **Response Payload:**
 
 | **Name** | **Data Type** | **Mandatory** | **Description** |
@@ -564,7 +616,111 @@ None
 
 ---
 
-## 6) API: Stop Charging Session
+## 6) API: Estimate Stop Charging Session
+
+**Method:**
+GET
+
+**Endpoints**
+`/v1/orders/{order_id}/stop`
+
+**Description**
+Get an estimate of completion summary and charges for stopping a charging session without performing the actual stop.
+
+**Headers:**
+
+| **Header Name** | **Data Type** | **Mandatory** | **Description** |
+|-----------------|---------------|---------------|-----------------|
+| Authorization | String | Yes | Bearer token for authentication |
+| X-Transaction-Id | String | Yes | Transaction identifier for request tracking |
+| X-Bpp-Id | String | Yes | Backend provider platform identifier |
+
+**Path Parameters:**
+
+| **Name** | **Data Type** | **Mandatory** | **Description** |
+|----------|---------------|---------------|-----------------|
+| order_id | String | Yes | Unique order identifier |
+
+**Query Parameters:**
+
+| **Name** | **Data Type** | **Mandatory** | **Description** |
+|----------|---------------|---------------|-----------------|
+| activity | String | No | Activity type related to stopping |
+
+**Request Payload:**
+None (GET request)
+
+**Response Headers:**
+
+| **Header Name** | **Data Type** | **Mandatory** | **Description** |
+|-----------------|---------------|---------------|-----------------|
+| X-Transaction-Id | String | Yes | Transaction identifier for request tracking |
+| X-Bpp-Id | String | Yes | BPP identifier |
+
+**Response Payload:**
+
+| **Name** | **Data Type** | **Mandatory** | **Description** |
+|----------|---------------|---------------|-----------------|
+| order | Object | Yes | Order information |
+| order.id | String | Yes | Order identifier |
+| order.status | String | Yes | Current order status (ACTIVE) |
+| order.mode | String | Yes | Order mode (RESERVATION) |
+| payment | Object | Yes | Payment information |
+| payment.status | String | Yes | Payment status (PAID) |
+| charging | Object | Yes | Charging session information |
+| charging.status | String | Yes | Charging status (ACTIVE) |
+| validity | Object | Yes | Validity period |
+| priceComponents | Array[Object] | Yes | Breakdown of estimated price components for stopping |
+| priceComponents[].type | String | Yes | Component type (PAID, FEE, REFUND) |
+| priceComponents[].value | String | Yes | Component value |
+| priceComponents[].currency | String | Yes | Currency code |
+| priceComponents[].description | String | Yes | Human-readable description |
+
+**Example Response JSON (Success):**
+
+```json
+{
+  "order": {
+    "id": "order-bpp-789012",
+    "status": "ACTIVE",
+    "mode": "RESERVATION"
+  },
+  "payment": {
+    "status": "PAID"
+  },
+  "charging": {
+    "status": "ACTIVE"
+  },
+  "validity": {
+    "startDate": "2025-12-02T14:00:00Z",
+    "endDate": "2025-12-02T18:00:00Z"
+  },
+  "priceComponents": [
+    {
+      "type": "PAID",
+      "value": "400.00",
+      "currency": "INR",
+      "description": "Base price"
+    },
+    {
+      "type": "FEE",
+      "value": "30.00",
+      "currency": "INR",
+      "description": "Cancellation charges"
+    },
+    {
+      "type": "REFUND",
+      "value": "-300.00",
+      "currency": "INR",
+      "description": "Cancellation refund"
+    }
+  ]
+}
+```
+
+---
+
+## 7) API: Stop Charging Session
 
 **Method:**
 PUT
@@ -593,17 +749,24 @@ Stop an active charging session for the specified order and receive completion s
 
 | **Name** | **Data Type** | **Mandatory** | **Description** |
 |----------|---------------|---------------|-----------------|
-| reason_code | String | No | Optional code indicating reason for stopping |
+| reasonCode | String | No | Optional code indicating reason for stopping |
 | message | String | No | Optional free-form message |
 
 **Example Request JSON:**
 
 ```json
 {
-  "reason_code": "BATTERY_FULL",
+  "reasonCode": "BATTERY_FULL",
   "message": "Battery reached desired level"
 }
 ```
+
+**Response Headers:**
+
+| **Header Name** | **Data Type** | **Mandatory** | **Description** |
+|-----------------|---------------|---------------|-----------------|
+| X-Transaction-Id | String | Yes | Transaction identifier for request tracking |
+| X-Bpp-Id | String | Yes | BPP identifier |
 
 **Response Payload:**
 
@@ -618,11 +781,11 @@ Stop an active charging session for the specified order and receive completion s
 | charging | Object | Yes | Charging session information |
 | charging.status | String | Yes | Charging status (COMPLETED) |
 | validity | Object | Yes | Validity period |
-| price_components | Array[Object] | Yes | Breakdown of final price components |
-| price_components[].type | String | Yes | Component type (BASE, SURCHARGE, DISCOUNT, FEE, REFUND) |
-| price_components[].value | Number/String | Yes | Component value (negative for refunds) |
-| price_components[].currency | String | Yes | Currency code |
-| price_components[].description | String | Yes | Human-readable description |
+| priceComponents | Array[Object] | Yes | Breakdown of final price components |
+| priceComponents[].type | String | Yes | Component type (BASE, SURCHARGE, DISCOUNT, FEE, REFUND) |
+| priceComponents[].value | Number/String | Yes | Component value (negative for refunds) |
+| priceComponents[].currency | String | Yes | Currency code |
+| priceComponents[].description | String | Yes | Human-readable description |
 
 **Example Response JSON (Success):**
 
@@ -643,7 +806,7 @@ Stop an active charging session for the specified order and receive completion s
     "startDate": "2025-12-02T14:00:00Z",
     "endDate": "2025-12-02T18:00:00Z"
   },
-  "price_components": [
+  "priceComponents": [
     {
       "type": "BASE",
       "value": 100,
@@ -680,7 +843,7 @@ Stop an active charging session for the specified order and receive completion s
 
 ---
 
-## 7) API: Cancel Order - Estimate
+## 8) API: Cancel Order - Estimate
 
 **Method:**
 GET
@@ -729,11 +892,11 @@ None (GET request)
 | charging | Object | Yes | Charging session information |
 | charging.status | String | Yes | Charging status (ACTIVE) |
 | validity | Object | Yes | Validity period |
-| price_components | Array[Object] | Yes | Breakdown of cancellation price components |
-| price_components[].type | String | Yes | Component type (PAID, FEE) |
-| price_components[].value | String | Yes | Component value |
-| price_components[].currency | String | Yes | Currency code |
-| price_components[].description | String | Yes | Human-readable description |
+| priceComponents | Array[Object] | Yes | Breakdown of cancellation price components |
+| priceComponents[].type | String | Yes | Component type (PAID, FEE) |
+| priceComponents[].value | String | Yes | Component value |
+| priceComponents[].currency | String | Yes | Currency code |
+| priceComponents[].description | String | Yes | Human-readable description |
 
 **Example Response JSON (Success):**
 
@@ -754,7 +917,7 @@ None (GET request)
     "startDate": "2025-12-02T14:00:00Z",
     "endDate": "2025-12-02T18:00:00Z"
   },
-  "price_components": [
+  "priceComponents": [
     {
       "type": "PAID",
       "value": "400.00",
@@ -773,7 +936,7 @@ None (GET request)
 
 ---
 
-## 8) API: Cancel Order - Confirm
+## 9) API: Cancel Order - Confirm
 
 **Method:**
 POST
@@ -814,6 +977,13 @@ Cancel an existing order and process refund after deducting cancellation charges
 }
 ```
 
+**Response Headers:**
+
+| **Header Name** | **Data Type** | **Mandatory** | **Description** |
+|-----------------|---------------|---------------|-----------------|
+| X-Transaction-Id | String | Yes | Transaction identifier for request tracking |
+| X-Bpp-Id | String | Yes | BPP identifier |
+
 **Response Payload:**
 
 | **Name** | **Data Type** | **Mandatory** | **Description** |
@@ -826,11 +996,11 @@ Cancel an existing order and process refund after deducting cancellation charges
 | payment.status | String | Yes | Payment status (PAID) |
 | charging | Object | Yes | Charging session information |
 | charging.status | String | Yes | Charging status (ACTIVE) |
-| price_components | Array[Object] | Yes | Breakdown of cancellation price components |
-| price_components[].type | String | Yes | Component type (FEE, REFUND) |
-| price_components[].value | String | Yes | Component value (negative for refunds) |
-| price_components[].currency | String | Yes | Currency code |
-| price_components[].description | String | Yes | Human-readable description |
+| priceComponents | Array[Object] | Yes | Breakdown of cancellation price components |
+| priceComponents[].type | String | Yes | Component type (FEE, REFUND) |
+| priceComponents[].value | String | Yes | Component value (negative for refunds) |
+| priceComponents[].currency | String | Yes | Currency code |
+| priceComponents[].description | String | Yes | Human-readable description |
 
 **Example Response JSON (Success):**
 
@@ -847,7 +1017,7 @@ Cancel an existing order and process refund after deducting cancellation charges
   "charging": {
     "status": "ACTIVE"
   },
-  "price_components": [
+  "priceComponents": [
     {
       "type": "FEE",
       "value": "30.00",
@@ -866,7 +1036,7 @@ Cancel an existing order and process refund after deducting cancellation charges
 
 ---
 
-## 9) API: Submit Rating & Feedback
+## 10) API: Submit Rating & Feedback
 
 **Method:**
 POST
@@ -912,6 +1082,13 @@ Submit a rating and optional feedback for the specified order after charging ses
 }
 ```
 
+**Response Headers:**
+
+| **Header Name** | **Data Type** | **Mandatory** | **Description** |
+|-----------------|---------------|---------------|-----------------|
+| X-Transaction-Id | String | Yes | Transaction identifier for request tracking |
+| X-Bpp-Id | String | Yes | BPP identifier |
+
 **Response Payload:**
 
 | **Name** | **Data Type** | **Mandatory** | **Description** |
@@ -922,8 +1099,8 @@ Submit a rating and optional feedback for the specified order after charging ses
 | order.mode | String | Yes | Order mode (RESERVATION) |
 | feedbackForm | Object | No | Additional feedback form information |
 | feedbackForm.url | String | No | URL to detailed feedback form |
-| feedbackForm.mime_type | String | No | MIME type of feedback form |
-| feedbackForm.submission_id | String | No | Unique submission identifier |
+| feedbackForm.mimeType | String | No | MIME type of feedback form |
+| feedbackForm.submissionId | String | No | Unique submission identifier |
 
 **Example Response JSON (Success):**
 
@@ -936,15 +1113,15 @@ Submit a rating and optional feedback for the specified order after charging ses
   },
   "feedbackForm": {
     "url": "https://example-bpp.com/feedback/portal",
-    "mime_type": "application/xml",
-    "submission_id": "feedback-123e4567-e89b-12d3-a456-426614174000"
+    "mimeType": "application/xml",
+    "submissionId": "feedback-123e4567-e89b-12d3-a456-426614174000"
   }
 }
 ```
 
 ---
 
-## 10) API: Get Order Support
+## 11) API: Get Order Support
 
 **Method:**
 GET
@@ -1079,12 +1256,14 @@ Authorization: Bearer <your_access_token>
    ↓
 6. Monitor Status (GET /v1/orders/{order_id}) [Polling/Real-time]
    ↓
-7. Stop Charging (PUT /v1/orders/{order_id}/stop)
+7. Estimate Stop (GET /v1/orders/{order_id}/stop) [Optional - to preview charges]
    ↓
-8. Submit Rating (POST /v1/orders/{order_id}/rating)
+8. Stop Charging (PUT /v1/orders/{order_id}/stop)
+   ↓
+9. Submit Rating (POST /v1/orders/{order_id}/rating)
 
 Alternative Flows:
-- Cancel Before Charging: After Step 3 → Cancel Order (POST /v1/orders/{order_id}/cancel)
+- Cancel Before Charging: After Step 3 → Cancel Order Estimate (GET /v1/orders/{order_id}/cancel) → Cancel Order (POST /v1/orders/{order_id}/cancel)
 - Get Support: Any time → Get Support (GET /v1/orders/{order_id}/support)
 ```
 
@@ -1094,8 +1273,7 @@ Alternative Flows:
 
 ### Connector Types
 - `TYPE_1`: Type 1 AC connector
-- `TYPE_2`: Type 2 AC connector (European standard)
-- `CCS2`: Combined Charging System 2 (DC fast charging)
+- `TYPE_2`: Type 2 AC connector (European standard, includes CCS2)
 
 ### Vehicle Types
 - `2-wheeler`: Two-wheeled electric vehicles
@@ -1106,7 +1284,6 @@ Alternative Flows:
 - `SLOW`: 3-7 kW (several hours)
 - `NORMAL`: 7-22 kW (2-4 hours)
 - `FAST`: 50-60 kW (30-60 minutes)
-- `ULTRAFAST`: 120+ kW (15-30 minutes)
 
 ### Connector Status
 - `Available`: Connector is available for use
@@ -1136,7 +1313,6 @@ Alternative Flows:
 ### Power Types
 - `DC`: Direct current (fast charging)
 - `AC`: Alternating current (standard charging)
-- `AC_3_PHASE`: Three-phase alternating current
 
 ### Payment Methods
 - `UPI`: Unified Payments Interface
@@ -1144,7 +1320,3 @@ Alternative Flows:
 - `Wallet`: Digital wallets
 - `BankTransfer`: Direct bank transfer
 - `NetBanking`: Online banking
-
----
-
-**Document End**

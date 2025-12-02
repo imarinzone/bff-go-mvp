@@ -47,94 +47,35 @@ paths:
                 per_page: 100
                 catalogs:
                   - id: catalog-ev-charging-001
+                    provider:
+                      id: ecopower-charging
+                      descriptor:
+                        name: EcoPower Charging Pvt Ltd
+                      address:
+                        name: MG JVLR Jogeshwari Caves Road
+                        geo_coordinates: [12.9716, 77.5946]
+                    rating:
+                      value: 4.5
+                      count: 128
                     connectors:
                       - id: ev-charger-ccs2-001
-                        geo_coordinates: [12.9716, 77.5946]
+                        isActive: true
                         availabilityWindow:
                           - startTime: "06:00:00"
                             endTime: "22:00:00"
-                        rating:
-                          value: 4.5
-                          count: 128
-                        isActive: true
-                        provider:
-                          id: ecopower-charging
-                          descriptor:
-                            name: EcoPower Charging Pvt Ltd
+                        price:
+                          value: "8"
+                          currency: "INR/kWH"
                         connectorAttributes:
                           connectorType: TYPE_2
                           maxPowerKW: 60
                           minPowerKW: 5
                           socketCount: 2
                           reservationSupported: true
-                          ocppId: IN-ECO-BTM-01
-                          evseId: IN*ECO*BTM*01*CCS2*A
-                          parkingType: Mall
-                          connectorId: CCS2-A
+                          status: Available
+                          chargingSpeed: FAST
                           powerType: DC
                           connectorFormat: CABLE
-                          chargingSpeed: FAST
-                          status: Available
-                      - id: ev-charger-ccs2-002
-                        geo_coordinates: [12.9716, 77.5946]
-                        availabilityWindow:
-                          - startTime: "00:00:00"
-                            endTime: "23:59:59"
-                        rating:
-                          value: 4.7
-                          count: 89
-                        isActive: true
-                        provider:
-                          id: greencharge-koramangala
-                          descriptor:
-                            name: GreenCharge Energy Solutions
-                        connectorAttributes:
-                          connectorType: TYPE_2
-                          maxPowerKW: 120
-                          minPowerKW: 10
-                          socketCount: 1
-                          reservationSupported: true
-                          amenityFeature:
-                            - Restaurant
-                            - Restroom
-                            - Wi-Fi
-                            - Parking
-                          ocppId: IN-GC-KOR-01
-                          evseId: IN*GC*KOR*01*CCS2*A
-                          roamingNetwork: GreenRoam
-                          parkingType: OffStreet
-                          connectorId: CCS2-B
-                          powerType: DC
-                          connectorFormat: CABLE
-                          chargingSpeed: FAST
-                          status: Available
-                      - id: ev-charger-type2-001
-                        geo_coordinates: [12.9716, 77.5946]
-                        availabilityWindow:
-                          - startTime: "08:00:00"
-                            endTime: "20:00:00"
-                        rating:
-                          value: 4.3
-                          count: 156
-                        isActive: true
-                        provider:
-                          id: powergrid-indiranagar
-                          descriptor:
-                            name: PowerGrid Charging Solutions
-                        connectorAttributes:
-                          connectorType: TYPE_2
-                          maxPowerKW: 22
-                          minPowerKW: 3
-                          socketCount: 4
-                          reservationSupported: true
-                          ocppId: IN-PG-IND-01
-                          evseId: IN*PG*IND*01*TYPE2*A
-                          parkingType: Office
-                          connectorId: TYPE2-A
-                          powerType: AC
-                          connectorFormat: CABLE
-                          chargingSpeed: NORMAL
-                          status: Available
                     offers:
                       - id: offer-ccs2-60kw-kwh
                         descriptor:
@@ -664,10 +605,10 @@ paths:
         required: true
         schema:
           type: string
+          default: <string>
   /v1/orders/{order_id}:
     get:
-      operationId: getOrderInfo
-      summary: Get Order Info
+      summary: get order info
       tags:
         - Orders
       parameters:
@@ -689,7 +630,7 @@ paths:
               required: true
               schema:
                 type: string
-                description: Transaction identifier for request tracking
+                default: <string>
             X-Bpp-Id:
               required: true
               schema:
@@ -2035,6 +1976,21 @@ components:
         count:
           type: integer
           description: Number of ratings
+    Address:
+      type: object
+      description: Address information
+      properties:
+        name:
+          type: string
+          description: Address name/location
+        geo_coordinates:
+          type: array
+          minItems: 2
+          maxItems: 2
+          description: Geographic coordinates as [latitude, longitude] array
+          items:
+            type: number
+          example: [12.9716, 77.5946]
     ProviderDescriptor:
       type: object
       description: Provider descriptor
@@ -2051,6 +2007,8 @@ components:
           description: Provider identifier
         descriptor:
           $ref: "#/components/schemas/ProviderDescriptor"
+        address:
+          $ref: "#/components/schemas/Address"
     ConnectorAttributes:
       type: object
       description: Technical attributes of the connector
@@ -2130,26 +2088,14 @@ components:
         id:
           type: string
           description: Unique connector identifier
-        geo_coordinates:
-          type: array
-          minItems: 2
-          maxItems: 2
-          description: Geographic coordinates as [latitude, longitude] array
-          items:
-            type: number
-          example: [12.9716, 77.5946]
+        isActive:
+          type: boolean
+          description: Whether the connector is currently active
         availabilityWindow:
           type: array
           description: Time windows when the connector is available
           items:
             $ref: "#/components/schemas/AvailabilityWindow"
-        rating:
-          $ref: "#/components/schemas/Rating"
-        isActive:
-          type: boolean
-          description: Whether the connector is currently active
-        provider:
-          $ref: "#/components/schemas/Provider"
         connectorAttributes:
           $ref: "#/components/schemas/ConnectorAttributes"
     BuyerFinderFee:
@@ -2253,6 +2199,10 @@ components:
         id:
           type: string
           description: Unique catalog identifier
+        provider:
+          $ref: "#/components/schemas/Provider"
+        rating:
+          $ref: "#/components/schemas/Rating"
         connectors:
           type: array
           description: List of charging connectors
@@ -2309,17 +2259,39 @@ components:
         cpo:
           type: string
           description: Charge Point Operator identifier
-        station:
-          type: string
-          description: Charging station identifier
         connector_type:
           type: string
           enum:
             - TYPE_1
             - TYPE_2
           description: Type of connector
+        max_power_kw:
+          type: number
+          format: float
+          minimum: 0
+          description: Minimum maximum power in kilowatts (filters connectors with maxPowerKW >= this value)
+        amenities:
+          type: array
+          description: List of required amenities (filters connectors that have all specified amenities)
+          items:
+            type: string
+          example:
+            - Restaurant
+            - Restroom
+            - Wi-Fi
         vehicle:
           $ref: "#/components/schemas/Vehicle"
+    SearchSort:
+      type: object
+      description: Sorting criteria
+      properties:
+        sort_by:
+          type: string
+          description: Field to sort by
+        order:
+          type: string
+          enum:
+            - asc
     TimeWindow:
       type: object
       description: Desired time window
@@ -2357,6 +2329,8 @@ components:
           $ref: "#/components/schemas/TimeWindow"
         filters:
           $ref: "#/components/schemas/SearchFilters"
+        sort:
+          $ref: "#/components/schemas/SearchSort"
       oneOf:
         - type: object
           required:
