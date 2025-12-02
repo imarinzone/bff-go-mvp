@@ -2,14 +2,14 @@ openapi: 3.0.0
 info:
   title: APIServiceGo
   version: 1.0.0
-  description: ""
+  description: EV Charging API for searching charging connectors, getting estimates, managing orders, and processing payments for electric vehicle charging sessions.
 servers:
   - url: http://{{localhost}}
 paths:
   /v1/search:
     post:
       operationId: searchChargingConnectors
-      summary: search
+      summary: Search Charging Connectors
       tags:
         - Discovery
       parameters:
@@ -62,7 +62,7 @@ paths:
                           descriptor:
                             name: EcoPower Charging Pvt Ltd
                         connectorAttributes:
-                          connectorType: CCS2
+                          connectorType: TYPE_2
                           maxPowerKW: 60
                           minPowerKW: 5
                           socketCount: 2
@@ -89,7 +89,7 @@ paths:
                           descriptor:
                             name: GreenCharge Energy Solutions
                         connectorAttributes:
-                          connectorType: CCS2
+                          connectorType: TYPE_2
                           maxPowerKW: 120
                           minPowerKW: 10
                           socketCount: 1
@@ -106,7 +106,7 @@ paths:
                           connectorId: CCS2-B
                           powerType: DC
                           connectorFormat: CABLE
-                          chargingSpeed: ULTRAFAST
+                          chargingSpeed: FAST
                           status: Available
                       - id: ev-charger-type2-001
                         geo_coordinates: [12.9716, 77.5946]
@@ -122,7 +122,7 @@ paths:
                           descriptor:
                             name: PowerGrid Charging Solutions
                         connectorAttributes:
-                          connectorType: Type2
+                          connectorType: TYPE_2
                           maxPowerKW: 22
                           minPowerKW: 3
                           socketCount: 4
@@ -131,8 +131,8 @@ paths:
                           evseId: IN*PG*IND*01*TYPE2*A
                           parkingType: Office
                           connectorId: TYPE2-A
-                          powerType: AC_3_PHASE
-                          connectorFormat: SOCKET
+                          powerType: AC
+                          connectorFormat: CABLE
                           chargingSpeed: NORMAL
                           status: Available
                     offers:
@@ -287,16 +287,12 @@ paths:
               $ref: "#/components/schemas/SearchRequest"
   /v1/estimate:
     post:
-      summary: get estimates
+      operationId: getEstimates
+      summary: Get Estimates
       tags:
         - Discovery
       parameters:
         - name: X-Transaction-Id
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: X-Bpp-Id
           in: header
           required: true
           schema:
@@ -309,12 +305,12 @@ paths:
               required: true
               schema:
                 type: string
-                default: <string>
+                description: Transaction identifier for request tracking
             X-Bpp-Id:
               required: true
               schema:
                 type: string
-                default: <string>
+                description: BPP identifier
           content:
             application/json:
               schema:
@@ -324,10 +320,14 @@ paths:
                   id: "1231208-id"
                   mode: reservation
                   status: quoted_price
-                currency: INR
-                amount: 128.64
-                durationMin: "15"
-                percentage: "80"
+                amount:
+                  value: 128.64
+                  currency: INR
+                durationInMinutes: "15"
+                percentageOfBatteryCharged: "80"
+                energy: 
+                  value: 30
+                  unit: kWh
                 validity:
                   startDate: "2025-01-27T00:00:00Z"
                   endDate: "2025-04-27T23:59:59Z"
@@ -476,7 +476,8 @@ paths:
               $ref: "#/components/schemas/EstimateRequest"
   /v1/orders/{order_id}/payment:
     post:
-      summary: payment
+      operationId: initiatePayment
+      summary: Initiate Payment
       tags:
         - Payments
       parameters:
@@ -507,20 +508,21 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/PaymentResponse"
               example:
                 order:
                   id: order-bpp-789012
                   status: ACTIVE
                   mode: RESERVATION
-                currency: INR
-                amount: 128.64
-                benificiary_id: ""
+                amount:
+                  value: 128.64
+                  currency: INR
+                beneficiaryId: ""
                 acceptedPaymentMethod:
                   - BankTransfer
                   - UPI
                   - Wallet
-                payment_url: ""
+                paymentUrl: ""
                 validity:
                   startDate: "2025-01-27T00:00:00Z"
                   endDate: "2025-04-27T23:59:59Z"
@@ -662,10 +664,10 @@ paths:
         required: true
         schema:
           type: string
-          default: <string>
   /v1/orders/{order_id}:
     get:
-      summary: get order info
+      operationId: getOrderInfo
+      summary: Get Order Info
       tags:
         - Orders
       parameters:
@@ -687,12 +689,12 @@ paths:
               required: true
               schema:
                 type: string
-                default: <string>
+                description: Transaction identifier for request tracking
             X-Bpp-Id:
               required: true
               schema:
                 type: string
-                default: <string>
+                description: BPP identifier
           content:
             application/json:
               schema:
@@ -703,7 +705,7 @@ paths:
                   status: ACTIVE
                   mode: RESERVATION
                 payment:
-                  status: PAIED
+                  status: PAID
                 charging:
                   status: ACTIVE
                 connectorId: ""
@@ -806,10 +808,10 @@ paths:
         required: true
         schema:
           type: string
-          default: <string>
   /v1/orders/{order_id}/cancel:
     get:
-      summary: estimate cancel
+      operationId: estimateCancel
+      summary: Estimate Cancel
       tags:
         - Orders
       parameters:
@@ -817,17 +819,14 @@ paths:
           in: query
           schema:
             type: string
-            default: <string>
         - name: cancel_reason
           in: query
           schema:
             type: string
-            default: <string>
         - name: cancel_code
           in: query
           schema:
             type: string
-            default: <string>
         - name: X-Transaction-Id
           in: header
           required: true
@@ -846,12 +845,12 @@ paths:
               required: true
               schema:
                 type: string
-                default: <string>
+                description: Transaction identifier for request tracking
             X-Bpp-Id:
               required: true
               schema:
                 type: string
-                default: <string>
+                description: BPP identifier
           content:
             application/json:
               schema:
@@ -862,14 +861,14 @@ paths:
                   status: ACTIVE
                   mode: RESERVATION
                 payment:
-                  status: PAIED
+                  status: PAID
                 charging:
                   status: ACTIVE
                 validity:
                   startDate: "2025-01-27T00:00:00Z"
                   endDate: "2025-04-27T23:59:59Z"
-                price_components:
-                  - type: PAIED
+                priceComponents:
+                  - type: PAID
                     value: "400.00"
                     currency: INR
                     description: Base price
@@ -970,9 +969,9 @@ paths:
         required: true
         schema:
           type: string
-          default: <string>
     post:
-      summary: cancel order
+      operationId: cancelOrder
+      summary: Cancel Order
       tags:
         - Orders
       parameters:
@@ -994,12 +993,12 @@ paths:
               required: true
               schema:
                 type: string
-                default: <string>
+                description: Transaction identifier for request tracking
             X-Bpp-Id:
               required: true
               schema:
                 type: string
-                default: <string>
+                description: BPP identifier
           content:
             application/json:
               schema:
@@ -1010,10 +1009,10 @@ paths:
                   status: CANCELLED
                   mode: RESERVATION
                 payment:
-                  status: PAIED
+                  status: PAID
                 charging:
                   status: ACTIVE
-                price_components:
+                priceComponents:
                   - type: FEE
                     value: "30.00"
                     currency: INR
@@ -1156,7 +1155,8 @@ paths:
               type: object
   /v1/orders/{order_id}/start:
     put:
-      summary: start charging
+      operationId: startCharging
+      summary: Start Charging
       tags:
         - Orders
       parameters:
@@ -1178,12 +1178,12 @@ paths:
               required: true
               schema:
                 type: string
-                default: <string>
+                description: Transaction identifier for request tracking
             X-Bpp-Id:
               required: true
               schema:
                 type: string
-                default: <string>
+                description: BPP identifier
           content:
             application/json:
               schema:
@@ -1194,7 +1194,7 @@ paths:
                   status: ACTIVE
                   mode: RESERVATION
                 payment:
-                  status: PAIED
+                  status: PAID
                 charging:
                   status: ACTIVE
         "400":
@@ -1336,10 +1336,10 @@ paths:
         required: true
         schema:
           type: string
-          default: <string>
   /v1/orders/{order_id}/stop:
     get:
-      summary: estimate stop
+      operationId: estimateStop
+      summary: Estimate Stop
       tags:
         - Orders
       parameters:
@@ -1347,7 +1347,6 @@ paths:
           in: query
           schema:
             type: string
-            default: <string>
         - name: X-Transaction-Id
           in: header
           required: true
@@ -1382,14 +1381,14 @@ paths:
                   status: ACTIVE
                   mode: RESERVATION
                 payment:
-                  status: PAIED
+                  status: PAID
                 charging:
                   status: ACTIVE
                 validity:
                   startDate: "2025-01-27T00:00:00Z"
                   endDate: "2025-04-27T23:59:59Z"
-                price_components:
-                  - type: PAIED
+                priceComponents:
+                  - type: PAID
                     value: "400.00"
                     currency: INR
                     description: Base price
@@ -1494,9 +1493,9 @@ paths:
         required: true
         schema:
           type: string
-          default: <string>
     put:
-      summary: stop charging
+      operationId: stopCharging
+      summary: Stop Charging
       tags:
         - Orders
       parameters:
@@ -1534,13 +1533,13 @@ paths:
                   status: COMPLETED
                   mode: RESERVATION
                 payment:
-                  status: PAIED
+                  status: PAID
                 charging:
                   status: COMPLETED
                 validity:
                   startDate: "2025-01-27T00:00:00Z"
                   endDate: "2025-04-27T23:59:59Z"
-                price_components:
+                priceComponents:
                   - type: BASE
                     value: 100
                     currency: INR
@@ -1699,7 +1698,8 @@ paths:
               $ref: "#/components/schemas/StopChargingRequest"
   /v1/orders/{order_id}/rating:
     post:
-      summary: set order rating
+      operationId: setOrderRating
+      summary: Set Order Rating
       tags:
         - Feedback
       parameters:
@@ -1738,8 +1738,8 @@ paths:
                   mode: RESERVATION
                 feedbackForm:
                   url: https://example-bpp.com/feedback/portal
-                  mime_type: application/xml
-                  submission_id: feedback-123e4567-e89b-12d3-a456-426614174000
+                  mimeType: application/xml
+                  submissionId: feedback-123e4567-e89b-12d3-a456-426614174000
         "400":
           description: Invalid rating value or malformed request.
           headers:
@@ -1879,10 +1879,10 @@ paths:
         required: true
         schema:
           type: string
-          default: <string>
   /v1/orders/{order_id}/support:
     get:
-      summary: get order support
+      operationId: getOrderSupport
+      summary: Get Order Support
       tags:
         - Support
       parameters:
@@ -1987,7 +1987,6 @@ paths:
         required: true
         schema:
           type: string
-          default: <string>
 components:
   schemas:
     Error:
@@ -2403,14 +2402,18 @@ components:
         unit:
           type: string
           example: kWh
-    BudgetPrice:
+    Amount:
       type: object
-      description: Budget constraint for estimation
+      description: Amount for estimation
       properties:
         value:
           type: number
+          format: float
+          minimum: 0
+          description: Amount value
         currency:
           type: string
+          description: Currency code (ISO 4217)
     EstimateRequest:
       type: object
       required:
@@ -2429,10 +2432,10 @@ components:
           $ref: "#/components/schemas/TimeWindow"
         energy:
           $ref: "#/components/schemas/Energy"
-        price:
-          $ref: "#/components/schemas/BudgetPrice"
         offer_id:
           type: string
+        amount:
+          $ref: "#/components/schemas/Amount"
     OrderInfo:
       type: object
       description: Order information
@@ -2452,7 +2455,7 @@ components:
       properties:
         status:
           type: string
-          description: Payment status (e.g., PAID, PAIED)
+          description: Payment status (e.g., PAID, PAID)
     ChargingInfo:
       type: object
       description: Charging session information
@@ -2509,19 +2512,18 @@ components:
       properties:
         order:
           $ref: "#/components/schemas/OrderInfo"
-        currency:
-          type: string
-          description: Currency code (ISO 4217)
         amount:
-          type: number
-          format: float
+          $ref: "#/components/schemas/Amount"
           description: Total estimated amount
-        durationMin:
+        durationInMinutes:
           type: string
           description: Estimated duration in minutes
-        percentage:
+        percentageOfBatteryCharged:
           type: string
           description: Percentage value (e.g., battery percentage)
+        energy:
+          $ref: "#/components/schemas/Energy"
+          description: Estimated energy in kWh
         validity:
           $ref: "#/components/schemas/Validity"
         priceComponents:
@@ -2629,7 +2631,7 @@ components:
           $ref: "#/components/schemas/ChargingInfo"
         validity:
           $ref: "#/components/schemas/Validity"
-        price_components:
+        priceComponents:
           type: array
           description: Breakdown of price components for cancellation
           items:
@@ -2644,7 +2646,7 @@ components:
           $ref: "#/components/schemas/PaymentInfo"
         charging:
           $ref: "#/components/schemas/ChargingInfo"
-        price_components:
+        priceComponents:
           type: array
           description: Breakdown of price components for cancellation
           items:
@@ -2674,7 +2676,7 @@ components:
           $ref: "#/components/schemas/ChargingInfo"
         validity:
           $ref: "#/components/schemas/Validity"
-        price_components:
+        priceComponents:
           type: array
           description: Breakdown of price components for stopping the session
           items:
@@ -2683,7 +2685,7 @@ components:
       type: object
       description: Stop charging request
       properties:
-        reason_code:
+        reasonCode:
           type: string
           description: Optional code indicating reason for stopping
         message:
@@ -2701,7 +2703,7 @@ components:
           $ref: "#/components/schemas/ChargingInfo"
         validity:
           $ref: "#/components/schemas/Validity"
-        price_components:
+        priceComponents:
           type: array
           description: Breakdown of price components for the completed session
           items:
@@ -2736,10 +2738,10 @@ components:
           type: string
           format: uri
           description: URL to the feedback form
-        mime_type:
+        mimeType:
           type: string
           description: MIME type of the feedback form
-        submission_id:
+        submissionId:
           type: string
           description: Unique submission identifier for the feedback
     RatingResponse:
@@ -2779,6 +2781,29 @@ components:
           items:
             type: string
             description: Support channel (e.g., phone, email, web, chat)
+    PaymentResponse:
+      type: object
+      description: Payment response
+      properties:
+        order:
+          $ref: "#/components/schemas/OrderInfo"
+        amount:
+          $ref: "#/components/schemas/Amount"
+          description: Total payment amount
+        beneficiaryId:
+          type: string
+          description: Beneficiary identifier
+        acceptedPaymentMethod:
+          type: array
+          description: List of accepted payment methods
+          items:
+            type: string
+        paymentUrl:
+          type: string
+          format: uri
+          description: URL for payment gateway (if applicable)
+        validity:
+          $ref: "#/components/schemas/Validity"
   securitySchemes:
     BearerAuth:
       type: http
