@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: APIServiceGo
   version: 1.0.0
-  description: ''
+  description: ""
 servers:
   - url: http://{{localhost}}
 paths:
@@ -29,17 +29,18 @@ paths:
             minimum: 1
             maximum: 100
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SearchResponse'
+                $ref: "#/components/schemas/SearchResponse"
               example:
                 total: 1
                 page: 1
@@ -211,62 +212,66 @@ paths:
                             feeValue: 1.5
                           idleFeePolicy: ₹1/min after 30 min post-charge
                         provider: powergrid-indiranagar
-        '400':
+        "400":
           description: Bad Request - Invalid request parameters or malformed request body.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "BAD_REQUEST"
                   message: "Invalid request parameters or malformed request body."
-        '401':
+        "401":
           description: Unauthorized - Invalid or missing authentication token.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "UNAUTHORIZED"
                   message: "Invalid or missing authentication token."
-        '422':
+        "422":
           description: Unprocessable Entity - Validation error in request data.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "VALIDATION_ERROR"
                   message: "Validation error in request data."
-        '500':
+        "500":
           description: Internal Server Error - Server error occurred while processing the request.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "INTERNAL_ERROR"
@@ -279,7 +284,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SearchRequest'
+              $ref: "#/components/schemas/SearchRequest"
   /v1/estimate:
     post:
       summary: get estimates
@@ -288,25 +293,32 @@ paths:
       parameters:
         - name: X-Transaction-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
+        - name: X-Bpp-Id
+          in: header
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 default: <string>
             X-Bpp-Id:
+              required: true
               schema:
                 type: string
                 default: <string>
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EstimateResponse'
+                $ref: "#/components/schemas/EstimateResponse"
               example:
                 order:
                   id: "1231208-id"
@@ -350,77 +362,107 @@ paths:
                   externalRef:
                     mimetype: text/html
                     url: https://example-company.com/charge/tnc.html
-        '400':
+        "400":
           description: Bad Request - Invalid request parameters or missing required fields.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "BAD_REQUEST"
                   message: "Invalid request parameters or missing required fields."
-        '401':
+        "401":
           description: Unauthorized - Invalid or missing authentication token.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "UNAUTHORIZED"
                   message: "Invalid or missing authentication token."
-        '404':
+        "404":
           description: Not Found - EVSE or connector not found.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "NOT_FOUND"
                   message: "EVSE or connector not found."
-        '422':
+        "422":
           description: Unprocessable Entity - Validation error in request data.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "VALIDATION_ERROR"
                   message: "Validation error in request data."
-        '500':
+        "500":
           description: Internal Server Error - Server error occurred while processing the request.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "INTERNAL_ERROR"
@@ -431,7 +473,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EstimateRequest'
+              $ref: "#/components/schemas/EstimateRequest"
   /v1/orders/{order_id}/payment:
     post:
       summary: payment
@@ -440,22 +482,28 @@ paths:
       parameters:
         - name: X-Transaction-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
         - name: X-Bpp-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
@@ -476,92 +524,128 @@ paths:
                 validity:
                   startDate: "2025-01-27T00:00:00Z"
                   endDate: "2025-04-27T23:59:59Z"
-        '400':
+        "400":
           description: Bad Request - Invalid request parameters or malformed request body.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "BAD_REQUEST"
                   message: "Invalid request parameters or malformed request body."
-        '401':
+        "401":
           description: Unauthorized - Invalid or missing authentication token.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "UNAUTHORIZED"
                   message: "Invalid or missing authentication token."
-        '404':
+        "404":
           description: Not Found - Order not found.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "NOT_FOUND"
                   message: "Order not found."
-        '409':
+        "409":
           description: Conflict - Payment already processed or order in invalid state for payment.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "CONFLICT"
                   message: "Payment already processed or order in invalid state for payment."
-        '422':
+        "422":
           description: Unprocessable Entity - Validation error in payment data.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "VALIDATION_ERROR"
                   message: "Validation error in payment data."
-        '500':
+        "500":
           description: Internal Server Error - Server error occurred while processing the request.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "INTERNAL_ERROR"
@@ -587,30 +671,32 @@ paths:
       parameters:
         - name: X-Transaction-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
         - name: X-Bpp-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 default: <string>
             X-Bpp-Id:
+              required: true
               schema:
                 type: string
                 default: <string>
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderResponse'
+                $ref: "#/components/schemas/OrderResponse"
               example:
                 order:
                   id: order-bpp-789012
@@ -648,47 +734,65 @@ paths:
                     - name: SESSION_DURATION
                       value: 10
                       unitCode: min
-        '401':
+        "401":
           description: Unauthorized - Invalid or missing authentication token.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "UNAUTHORIZED"
                   message: "Invalid or missing authentication token."
-        '404':
+        "404":
           description: Not Found - Order not found.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "NOT_FOUND"
                   message: "Order not found."
-        '500':
+        "500":
           description: Internal Server Error - Server error occurred while processing the request.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "INTERNAL_ERROR"
@@ -726,30 +830,32 @@ paths:
             default: <string>
         - name: X-Transaction-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
         - name: X-Bpp-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 default: <string>
             X-Bpp-Id:
+              required: true
               schema:
                 type: string
                 default: <string>
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CancelEstimateResponse'
+                $ref: "#/components/schemas/CancelEstimateResponse"
               example:
                 order:
                   id: order-bpp-789012
@@ -771,62 +877,86 @@ paths:
                     value: "30.00"
                     currency: INR
                     description: Cancellation charges
-        '400':
+        "400":
           description: Bad Request - Invalid query parameters.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "BAD_REQUEST"
                   message: "Invalid query parameters."
-        '401':
+        "401":
           description: Unauthorized - Invalid or missing authentication token.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "UNAUTHORIZED"
                   message: "Invalid or missing authentication token."
-        '404':
+        "404":
           description: Not Found - Order not found.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "NOT_FOUND"
                   message: "Order not found."
-        '500':
+        "500":
           description: Internal Server Error - Server error occurred while processing the request.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "INTERNAL_ERROR"
@@ -848,30 +978,32 @@ paths:
       parameters:
         - name: X-Transaction-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
         - name: X-Bpp-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
       responses:
-        '202':
+        "202":
           description: Accepted
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 default: <string>
             X-Bpp-Id:
+              required: true
               schema:
                 type: string
                 default: <string>
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CancelResponse'
+                $ref: "#/components/schemas/CancelResponse"
               example:
                 order:
                   id: order-bpp-789012
@@ -890,92 +1022,128 @@ paths:
                     value: "-300.00"
                     currency: INR
                     description: Cancellation refund
-        '400':
+        "400":
           description: Bad Request - Invalid request parameters or malformed request body.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "BAD_REQUEST"
                   message: "Invalid request parameters or malformed request body."
-        '401':
+        "401":
           description: Unauthorized - Invalid or missing authentication token.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "UNAUTHORIZED"
                   message: "Invalid or missing authentication token."
-        '404':
+        "404":
           description: Not Found - Order not found.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "NOT_FOUND"
                   message: "Order not found."
-        '409':
+        "409":
           description: Conflict - Order cannot be cancelled in its current state.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "CONFLICT"
                   message: "Order cannot be cancelled in its current state."
-        '422':
+        "422":
           description: Unprocessable Entity - Validation error in request data.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "VALIDATION_ERROR"
                   message: "Validation error in request data."
-        '500':
+        "500":
           description: Internal Server Error - Server error occurred while processing the request.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "INTERNAL_ERROR"
@@ -994,30 +1162,32 @@ paths:
       parameters:
         - name: X-Transaction-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
         - name: X-Bpp-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
       responses:
-        '202':
+        "202":
           description: Accepted
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 default: <string>
             X-Bpp-Id:
+              required: true
               schema:
                 type: string
                 default: <string>
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StartChargingResponse'
+                $ref: "#/components/schemas/StartChargingResponse"
               example:
                 order:
                   id: order-bpp-789012
@@ -1027,92 +1197,128 @@ paths:
                   status: PAIED
                 charging:
                   status: ACTIVE
-        '400':
-          description: Bad Request - Invalid request parameters, missing OTP, or invalid authorization mode.
+        "400":
+          description: Bad Request - Invalid request parameters or invalid authorization mode.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "BAD_REQUEST"
-                  message: "Invalid request parameters, missing OTP, or invalid authorization mode."
-        '401':
-          description: Unauthorized - Invalid or missing authentication token or invalid OTP.
+                  message: "Invalid request parameters or invalid authorization mode."
+        "401":
+          description: Unauthorized - Invalid or missing authentication token.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "UNAUTHORIZED"
-                  message: "Invalid or missing authentication token or invalid OTP."
-        '404':
+                  message: "Invalid or missing authentication token."
+        "404":
           description: Not Found - Order not found.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "NOT_FOUND"
                   message: "Order not found."
-        '409':
+        "409":
           description: Conflict - Order cannot be started in its current state or charging already in progress.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "CONFLICT"
                   message: "Order cannot be started in its current state or charging already in progress."
-        '422':
+        "422":
           description: Unprocessable Entity - Validation error in request data.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "VALIDATION_ERROR"
                   message: "Validation error in request data."
-        '500':
+        "500":
           description: Internal Server Error - Server error occurred while processing the request.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "INTERNAL_ERROR"
@@ -1123,7 +1329,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StartChargingRequest'
+              $ref: "#/components/schemas/StartChargingRequest"
     parameters:
       - name: order_id
         in: path
@@ -1144,21 +1350,32 @@ paths:
             default: <string>
         - name: X-Transaction-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
         - name: X-Bpp-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
       responses:
-        '200':
+        "200":
           description: OK
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StopEstimateResponse'
+                $ref: "#/components/schemas/StopEstimateResponse"
               example:
                 order:
                   id: order-bpp-789012
@@ -1184,62 +1401,86 @@ paths:
                     value: "-300.00"
                     currency: INR
                     description: Cancellation refund
-        '400':
+        "400":
           description: Bad Request - Invalid query parameters.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "BAD_REQUEST"
                   message: "Invalid query parameters."
-        '401':
+        "401":
           description: Unauthorized - Invalid or missing authentication token.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "UNAUTHORIZED"
                   message: "Invalid or missing authentication token."
-        '404':
+        "404":
           description: Not Found - Order not found or no active charging session.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "NOT_FOUND"
                   message: "Order not found or no active charging session."
-        '500':
+        "500":
           description: Internal Server Error - Server error occurred while processing the request.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "INTERNAL_ERROR"
@@ -1261,26 +1502,32 @@ paths:
       parameters:
         - name: X-Transaction-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
         - name: X-Bpp-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
       responses:
-        '200':
+        "200":
           description: Completed summary for the stopped charging session.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StopChargingResponse'
+                $ref: "#/components/schemas/StopChargingResponse"
               example:
                 order:
                   id: order-bpp-789012
@@ -1318,92 +1565,128 @@ paths:
                     value: "-300.00"
                     currency: INR
                     description: Cancellation refund
-        '400':
+        "400":
           description: Bad Request - Invalid request parameters or malformed request body.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "BAD_REQUEST"
                   message: "Invalid request parameters or malformed request body."
-        '401':
+        "401":
           description: Unauthorized - Invalid or missing authentication token.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "UNAUTHORIZED"
                   message: "Invalid or missing authentication token."
-        '404':
+        "404":
           description: Not Found - Order not found or no active charging session.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "NOT_FOUND"
                   message: "Order not found or no active charging session."
-        '409':
+        "409":
           description: Conflict - Charging session cannot be stopped in its current state.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "CONFLICT"
                   message: "Charging session cannot be stopped in its current state."
-        '422':
+        "422":
           description: Unprocessable Entity - Validation error in request data.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "VALIDATION_ERROR"
                   message: "Validation error in request data."
-        '500':
+        "500":
           description: Internal Server Error - Server error occurred while processing the request.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "INTERNAL_ERROR"
@@ -1413,7 +1696,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StopChargingRequest'
+              $ref: "#/components/schemas/StopChargingRequest"
   /v1/orders/{order_id}/rating:
     post:
       summary: set order rating
@@ -1422,26 +1705,32 @@ paths:
       parameters:
         - name: X-Transaction-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
         - name: X-Bpp-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
       responses:
-        '201':
+        "201":
           description: Created
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RatingResponse'
+                $ref: "#/components/schemas/RatingResponse"
               example:
                 order:
                   id: order-bpp-789012
@@ -1451,92 +1740,128 @@ paths:
                   url: https://example-bpp.com/feedback/portal
                   mime_type: application/xml
                   submission_id: feedback-123e4567-e89b-12d3-a456-426614174000
-        '400':
+        "400":
           description: Invalid rating value or malformed request.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "BAD_REQUEST"
                   message: "Invalid rating value or malformed request."
-        '401':
+        "401":
           description: Unauthorized - Invalid or missing authentication token.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "UNAUTHORIZED"
                   message: "Invalid or missing authentication token."
-        '404':
+        "404":
           description: Order not found.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "NOT_FOUND"
                   message: "Order not found."
-        '409':
+        "409":
           description: Conflict - Rating already submitted for this order.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "CONFLICT"
                   message: "Rating already submitted for this order."
-        '422':
+        "422":
           description: Unprocessable Entity - Validation error in rating data.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "VALIDATION_ERROR"
                   message: "Validation error in rating data."
-        '500':
+        "500":
           description: Internal Server Error - Server error occurred while processing the request.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "INTERNAL_ERROR"
@@ -1547,7 +1872,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RatingRequest'
+              $ref: "#/components/schemas/RatingRequest"
     parameters:
       - name: order_id
         in: path
@@ -1563,21 +1888,21 @@ paths:
       parameters:
         - name: X-Transaction-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
         - name: X-Bpp-Id
           in: header
+          required: true
           schema:
             type: string
-            default: <string>
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupportResponse'
+                $ref: "#/components/schemas/SupportResponse"
               example:
                 order:
                   id: order-bpp-789012
@@ -1593,47 +1918,65 @@ paths:
                   - email
                   - web
                   - chat
-        '401':
+        "401":
           description: Unauthorized - Invalid or missing authentication token.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "UNAUTHORIZED"
                   message: "Invalid or missing authentication token."
-        '404':
+        "404":
           description: Not Found - Order not found.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "NOT_FOUND"
                   message: "Order not found."
-        '500':
+        "500":
           description: Internal Server Error - Server error occurred while processing the request.
           headers:
             X-Transaction-Id:
+              required: true
               schema:
                 type: string
                 description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 error:
                   code: "INTERNAL_ERROR"
@@ -1708,7 +2051,7 @@ components:
           type: string
           description: Provider identifier
         descriptor:
-          $ref: '#/components/schemas/ProviderDescriptor'
+          $ref: "#/components/schemas/ProviderDescriptor"
     ConnectorAttributes:
       type: object
       description: Technical attributes of the connector
@@ -1800,16 +2143,16 @@ components:
           type: array
           description: Time windows when the connector is available
           items:
-            $ref: '#/components/schemas/AvailabilityWindow'
+            $ref: "#/components/schemas/AvailabilityWindow"
         rating:
-          $ref: '#/components/schemas/Rating'
+          $ref: "#/components/schemas/Rating"
         isActive:
           type: boolean
           description: Whether the connector is currently active
         provider:
-          $ref: '#/components/schemas/Provider'
+          $ref: "#/components/schemas/Provider"
         connectorAttributes:
-          $ref: '#/components/schemas/ConnectorAttributes'
+          $ref: "#/components/schemas/ConnectorAttributes"
     BuyerFinderFee:
       type: object
       description: Finder fee information
@@ -1826,7 +2169,7 @@ components:
       description: Additional offer attributes
       properties:
         buyerFinderFee:
-          $ref: '#/components/schemas/BuyerFinderFee'
+          $ref: "#/components/schemas/BuyerFinderFee"
         idleFeePolicy:
           type: string
           description: Idle fee policy description
@@ -1856,7 +2199,7 @@ components:
           format: float
           description: Price value
         applicableQuantity:
-          $ref: '#/components/schemas/ApplicableQuantity'
+          $ref: "#/components/schemas/ApplicableQuantity"
     Validity:
       type: object
       description: Offer validity period
@@ -1884,23 +2227,23 @@ components:
           type: string
           description: Unique offer identifier
         descriptor:
-          $ref: '#/components/schemas/OfferDescriptor'
+          $ref: "#/components/schemas/OfferDescriptor"
         items:
           type: array
           description: List of connector IDs this offer applies to
           items:
             type: string
         price:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
         validity:
-          $ref: '#/components/schemas/Validity'
+          $ref: "#/components/schemas/Validity"
         acceptedPaymentMethod:
           type: array
           description: List of accepted payment methods
           items:
             type: string
         offerAttributes:
-          $ref: '#/components/schemas/OfferAttributes'
+          $ref: "#/components/schemas/OfferAttributes"
         provider:
           type: string
           description: Provider identifier
@@ -1915,12 +2258,12 @@ components:
           type: array
           description: List of charging connectors
           items:
-            $ref: '#/components/schemas/Connector'
+            $ref: "#/components/schemas/Connector"
         offers:
           type: array
           description: List of pricing offers for connectors
           items:
-            $ref: '#/components/schemas/Offer'
+            $ref: "#/components/schemas/Offer"
     SearchResponse:
       type: object
       required:
@@ -1942,7 +2285,7 @@ components:
           type: array
           description: List of catalogs containing connectors and offers
           items:
-            $ref: '#/components/schemas/Catalog'
+            $ref: "#/components/schemas/Catalog"
     Vehicle:
       type: object
       description: Vehicle information
@@ -1977,7 +2320,7 @@ components:
             - TYPE_2
           description: Type of connector
         vehicle:
-          $ref: '#/components/schemas/Vehicle'
+          $ref: "#/components/schemas/Vehicle"
     TimeWindow:
       type: object
       description: Desired time window
@@ -2012,9 +2355,9 @@ components:
           example: 5000
           description: Radius of search in meters (0-50000)
         time_window:
-          $ref: '#/components/schemas/TimeWindow'
+          $ref: "#/components/schemas/TimeWindow"
         filters:
-          $ref: '#/components/schemas/SearchFilters'
+          $ref: "#/components/schemas/SearchFilters"
       oneOf:
         - type: object
           required:
@@ -2024,9 +2367,9 @@ components:
               type: string
               description: Specific EVSE identifier to look up
             time_window:
-              $ref: '#/components/schemas/TimeWindow'
+              $ref: "#/components/schemas/TimeWindow"
             filters:
-              $ref: '#/components/schemas/SearchFilters'
+              $ref: "#/components/schemas/SearchFilters"
         - type: object
           required:
             - geo_coordinates
@@ -2048,9 +2391,9 @@ components:
               example: 5000
               description: Radius of search in meters (0-50000)
             time_window:
-              $ref: '#/components/schemas/TimeWindow'
+              $ref: "#/components/schemas/TimeWindow"
             filters:
-              $ref: '#/components/schemas/SearchFilters'
+              $ref: "#/components/schemas/SearchFilters"
     Energy:
       type: object
       description: Target energy for estimation
@@ -2079,15 +2422,15 @@ components:
           type: string
           description: EVSE identifier of the selected connector/station
         vehicle:
-          $ref: '#/components/schemas/Vehicle'
+          $ref: "#/components/schemas/Vehicle"
         connector_id:
           type: string
         time_window:
-          $ref: '#/components/schemas/TimeWindow'
+          $ref: "#/components/schemas/TimeWindow"
         energy:
-          $ref: '#/components/schemas/Energy'
+          $ref: "#/components/schemas/Energy"
         price:
-          $ref: '#/components/schemas/BudgetPrice'
+          $ref: "#/components/schemas/BudgetPrice"
         offer_id:
           type: string
     OrderInfo:
@@ -2140,9 +2483,9 @@ components:
       description: Cancellation policy and fees
       properties:
         fee:
-          $ref: '#/components/schemas/CancellationFee'
+          $ref: "#/components/schemas/CancellationFee"
         externalRef:
-          $ref: '#/components/schemas/ExternalRef'
+          $ref: "#/components/schemas/ExternalRef"
     PriceComponent:
       type: object
       description: Price component breakdown
@@ -2165,7 +2508,7 @@ components:
       description: Estimate response
       properties:
         order:
-          $ref: '#/components/schemas/OrderInfo'
+          $ref: "#/components/schemas/OrderInfo"
         currency:
           type: string
           description: Currency code (ISO 4217)
@@ -2180,14 +2523,14 @@ components:
           type: string
           description: Percentage value (e.g., battery percentage)
         validity:
-          $ref: '#/components/schemas/Validity'
+          $ref: "#/components/schemas/Validity"
         priceComponents:
           type: array
           description: Breakdown of price components
           items:
-            $ref: '#/components/schemas/PriceComponent'
+            $ref: "#/components/schemas/PriceComponent"
         cancellation:
-          $ref: '#/components/schemas/CancellationPolicy'
+          $ref: "#/components/schemas/CancellationPolicy"
     ChargingMetric:
       type: object
       description: Charging telemetry metric
@@ -2214,17 +2557,17 @@ components:
           type: array
           description: Array of charging metrics
           items:
-            $ref: '#/components/schemas/ChargingMetric'
+            $ref: "#/components/schemas/ChargingMetric"
     OrderResponse:
       type: object
       description: Order response with details
       properties:
         order:
-          $ref: '#/components/schemas/OrderInfo'
+          $ref: "#/components/schemas/OrderInfo"
         payment:
-          $ref: '#/components/schemas/PaymentInfo'
+          $ref: "#/components/schemas/PaymentInfo"
         charging:
-          $ref: '#/components/schemas/ChargingInfo'
+          $ref: "#/components/schemas/ChargingInfo"
         connectorId:
           type: string
           description: Connector identifier
@@ -2232,13 +2575,13 @@ components:
           type: string
           description: Type of connector
         vehicle:
-          $ref: '#/components/schemas/Vehicle'
+          $ref: "#/components/schemas/Vehicle"
         trackingUrl:
           type: string
           format: uri
           description: URL to track the charging session
         chargingTelemetry:
-          $ref: '#/components/schemas/ChargingTelemetry'
+          $ref: "#/components/schemas/ChargingTelemetry"
     PriceComponentString:
       type: object
       description: Price component with string value
@@ -2279,70 +2622,63 @@ components:
       description: Cancellation estimate response
       properties:
         order:
-          $ref: '#/components/schemas/OrderInfo'
+          $ref: "#/components/schemas/OrderInfo"
         payment:
-          $ref: '#/components/schemas/PaymentInfo'
+          $ref: "#/components/schemas/PaymentInfo"
         charging:
-          $ref: '#/components/schemas/ChargingInfo'
+          $ref: "#/components/schemas/ChargingInfo"
         validity:
-          $ref: '#/components/schemas/Validity'
+          $ref: "#/components/schemas/Validity"
         price_components:
           type: array
           description: Breakdown of price components for cancellation
           items:
-            $ref: '#/components/schemas/PriceComponentString'
+            $ref: "#/components/schemas/PriceComponentString"
     CancelResponse:
       type: object
       description: Cancel order response
       properties:
         order:
-          $ref: '#/components/schemas/OrderInfo'
+          $ref: "#/components/schemas/OrderInfo"
         payment:
-          $ref: '#/components/schemas/PaymentInfo'
+          $ref: "#/components/schemas/PaymentInfo"
         charging:
-          $ref: '#/components/schemas/ChargingInfo'
+          $ref: "#/components/schemas/ChargingInfo"
         price_components:
           type: array
           description: Breakdown of price components for cancellation
           items:
-            $ref: '#/components/schemas/PriceComponentString'
+            $ref: "#/components/schemas/PriceComponentString"
     StartChargingRequest:
       type: object
       description: Start charging request
-      properties:
-        authorization_mode:
-          type: string
-          description: Authorization mode used to start charging (e.g., OTP)
-        otp:
-          type: string
-          description: One-time password provided to authorize start
     StartChargingResponse:
       type: object
       description: Start charging response
       properties:
         order:
-          $ref: '#/components/schemas/OrderInfo'
+          $ref: "#/components/schemas/OrderInfo"
         payment:
-          $ref: '#/components/schemas/PaymentInfo'
+          $ref: "#/components/schemas/PaymentInfo"
         charging:
-          $ref: '#/components/schemas/ChargingInfo'
+          $ref: "#/components/schemas/ChargingInfo"
     StopEstimateResponse:
       type: object
       description: Stop estimate response
       properties:
         order:
-          $ref: '#/components/schemas/OrderInfo'
+          $ref: "#/components/schemas/OrderInfo"
         payment:
-          $ref: '#/components/schemas/PaymentInfo'
+          $ref: "#/components/schemas/PaymentInfo"
         charging:
-          $ref: '#/components/schemas/ChargingInfo'
+          $ref: "#/components/schemas/ChargingInfo"
         validity:
-          $ref: '#/components/schemas/Validity'
+          $ref: "#/components/schemas/Validity"
         price_components:
           type: array
           description: Breakdown of price components for stopping the session
           items:
-            $ref: '#/components/schemas/PriceComponentString'
+            $ref: "#/components/schemas/PriceComponentString"
     StopChargingRequest:
       type: object
       description: Stop charging request
@@ -2358,18 +2694,18 @@ components:
       description: Stop charging response
       properties:
         order:
-          $ref: '#/components/schemas/OrderInfo'
+          $ref: "#/components/schemas/OrderInfo"
         payment:
-          $ref: '#/components/schemas/PaymentInfo'
+          $ref: "#/components/schemas/PaymentInfo"
         charging:
-          $ref: '#/components/schemas/ChargingInfo'
+          $ref: "#/components/schemas/ChargingInfo"
         validity:
-          $ref: '#/components/schemas/Validity'
+          $ref: "#/components/schemas/Validity"
         price_components:
           type: array
           description: Breakdown of price components for the completed session
           items:
-            $ref: '#/components/schemas/PriceComponentFlexible'
+            $ref: "#/components/schemas/PriceComponentFlexible"
     Feedback:
       type: object
       description: Feedback information
@@ -2391,7 +2727,7 @@ components:
           maximum: 5
           description: Rating score between 1 and 5
         feedback:
-          $ref: '#/components/schemas/Feedback'
+          $ref: "#/components/schemas/Feedback"
     FeedbackForm:
       type: object
       description: Feedback form information
@@ -2411,15 +2747,15 @@ components:
       description: Rating response
       properties:
         order:
-          $ref: '#/components/schemas/OrderInfo'
+          $ref: "#/components/schemas/OrderInfo"
         feedbackForm:
-          $ref: '#/components/schemas/FeedbackForm'
+          $ref: "#/components/schemas/FeedbackForm"
     SupportResponse:
       type: object
       description: Support response
       properties:
         order:
-          $ref: '#/components/schemas/OrderInfo'
+          $ref: "#/components/schemas/OrderInfo"
         name:
           type: string
           description: Support team name
@@ -2460,4 +2796,3 @@ tags:
     description: Give feedback to the order once completed.
   - name: Support
     description: Get support for any order.
-  
