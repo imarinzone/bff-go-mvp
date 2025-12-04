@@ -9,12 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
-	"bff-go-mvp/internal/api"
 	"bff-go-mvp/internal/config"
 	"bff-go-mvp/internal/logger"
+	"bff-go-mvp/internal/router"
 )
 
 func main() {
@@ -28,27 +27,8 @@ func main() {
 	// Load configuration
 	cfg := config.Load()
 
-	// Create discovery handler
-	discoveryHandler := api.NewDiscoveryHandler(
-		cfg.GRPC.ServiceAddress,
-		zapLogger,
-	)
-
-	// Setup router
-	r := mux.NewRouter()
-
-	// Middleware for logging
-	r.Use(loggingMiddleware(zapLogger))
-	r.Use(recoveryMiddleware(zapLogger))
-
-	// Register routes
-	r.HandleFunc("/discovery", discoveryHandler.HandleDiscovery).Methods("POST")
-
-	// Health check endpoint
-	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
-	}).Methods("GET")
+	// Setup router with all endpoints
+	r := router.New(cfg, zapLogger)
 
 	// Start server
 	serverAddr := fmt.Sprintf(":%s", cfg.API.Port)
@@ -86,57 +66,4 @@ func main() {
 	}
 
 	zapLogger.Info("Server exited")
-}
-
-// loggingMiddleware logs HTTP requests
-func loggingMiddleware(logger *zap.Logger) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			start := time.Now()
-
-			// Wrap response writer to capture status code
-			wrapped := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
-
-			next.ServeHTTP(wrapped, r)
-
-			duration := time.Since(start)
-			logger.Info("HTTP request",
-				zap.String("method", r.Method),
-				zap.String("path", r.URL.Path),
-				zap.String("remote_addr", r.RemoteAddr),
-				zap.Int("status", wrapped.statusCode),
-				zap.Duration("duration", duration),
-			)
-		})
-	}
-}
-
-// recoveryMiddleware recovers from panics
-func recoveryMiddleware(logger *zap.Logger) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			defer func() {
-				if err := recover(); err != nil {
-					logger.Error("Panic recovered",
-						zap.Any("error", err),
-						zap.String("method", r.Method),
-						zap.String("path", r.URL.Path),
-					)
-					http.Error(w, "Internal server error", http.StatusInternalServerError)
-				}
-			}()
-			next.ServeHTTP(w, r)
-		})
-	}
-}
-
-// responseWriter wraps http.ResponseWriter to capture status code
-type responseWriter struct {
-	http.ResponseWriter
-	statusCode int
-}
-
-func (rw *responseWriter) WriteHeader(code int) {
-	rw.statusCode = code
-	rw.ResponseWriter.WriteHeader(code)
 }

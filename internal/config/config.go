@@ -6,8 +6,8 @@ import (
 
 // Config holds application configuration
 type Config struct {
-	GRPC GRPCConfig
-	API  APIConfig
+	GRPC    GRPCConfig
+	API     APIConfig
 }
 
 // GRPCConfig holds gRPC client configuration
