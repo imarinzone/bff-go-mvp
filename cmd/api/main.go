@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"go.temporal.io/sdk/client"
 	"go.uber.org/zap"
 
 	"bff-go-mvp/internal/api"
@@ -29,21 +28,9 @@ func main() {
 	// Load configuration
 	cfg := config.Load()
 
-	// Create Temporal client
-	temporalClient, err := client.Dial(client.Options{
-		HostPort:  cfg.Temporal.Host,
-		Namespace: cfg.Temporal.Namespace,
-	})
-	if err != nil {
-		zapLogger.Fatal("Unable to create Temporal client", zap.Error(err))
-	}
-	defer temporalClient.Close()
-
-	// Create discovery handler (temporalClient implements TemporalWorkflowExecutor interface)
+	// Create discovery handler
 	discoveryHandler := api.NewDiscoveryHandler(
-		temporalClient,
 		cfg.GRPC.ServiceAddress,
-		cfg.Temporal.TaskQueue,
 		zapLogger,
 	)
 

@@ -1,13 +1,12 @@
 # BFF Go MVP
 
-A Backend for Frontend (BFF) service built with Go that handles REST API requests and communicates with downstream microservices via gRPC using Temporal for workflow orchestration.
+A Backend for Frontend (BFF) service built with Go that handles REST API requests and communicates directly with downstream microservices via gRPC.
 
 ## Architecture
 
 - **REST API**: Gorilla Mux router for handling HTTP requests
 - **Logging**: Zap for structured, high-performance logging
-- **Temporal**: Workflow orchestration for async processing
-- **gRPC**: Communication with downstream microservices
+- **gRPC**: Direct communication with downstream microservices
 - **Protobuf**: Service definitions and data contracts
 
 ## Project Structure
@@ -15,15 +14,14 @@ A Backend for Frontend (BFF) service built with Go that handles REST API request
 ```
 bff-go-mvp/
 ├── cmd/
-│   ├── api/          # REST API server
-│   └── worker/       # Temporal worker
+│   └── api/          # REST API server
 ├── internal/
 │   ├── api/          # API handlers
-│   ├── temporal/     # Temporal workflows & activities
 │   ├── grpc/         # gRPC client
 │   ├── config/       # Configuration
 │   └── logger/       # Logger utilities
 ├── proto/            # Protobuf definitions
+├── test/             # Test files (mirrors source structure)
 └── pkg/              # Shared packages
     └── models/       # Data models
 ```
@@ -31,8 +29,7 @@ bff-go-mvp/
 ## Prerequisites
 
 ### For Local Development
-- Go 1.24 or higher
-- Temporal server running (default: localhost:7233)
+- Go 1.21 or higher
 - Protocol Buffers compiler (`protoc`) - for generating code from `.proto` files
 - Go protobuf plugins:
   - `protoc-gen-go` - generates Go code from protobuf
@@ -136,20 +133,11 @@ If you get "command not found" errors, ensure:
 2. Go bin directory is in your PATH: `export PATH="$PATH:$(go env GOPATH)/bin"`
 3. Verify with: `which protoc protoc-gen-go protoc-gen-go-grpc`
 
-5. Start Temporal server (if not already running):
-```bash
-# Using Docker Compose (includes Temporal, PostgreSQL, API, and Worker)
-docker-compose up -d
-
-# Or using Docker directly
-docker run -p 7233:7233 temporalio/auto-setup:latest
-```
-
 ## Running the Application
 
 ### Using Docker Compose (Recommended)
 
-Start all services (Temporal, PostgreSQL, API, and Worker) with a single command:
+Start the API service:
 
 ```bash
 docker-compose up -d
@@ -162,8 +150,6 @@ docker-compose logs -f
 
 # Specific service
 docker-compose logs -f api
-docker-compose logs -f worker
-docker-compose logs -f temporal
 ```
 
 Stop all services:
@@ -178,18 +164,8 @@ docker-compose down -v
 
 ### Local Development
 
-#### Start the Temporal Worker
-
-In one terminal:
-```bash
-make run-worker
-# or
-go run cmd/worker/main.go
-```
-
 #### Start the API Server
 
-In another terminal:
 ```bash
 make run-api
 # or
@@ -200,30 +176,17 @@ The API server will start on `http://localhost:8080`
 
 ### Docker Commands
 
-Build individual images:
+Build the API image:
 ```bash
-# Build API image
 docker build -f Dockerfile.api -t bff-api:latest .
-
-# Build Worker image
-docker build -f Dockerfile.worker -t bff-worker:latest .
 ```
 
-Run individual containers:
+Run the API container:
 ```bash
-# Run API container
 docker run -p 8080:8080 \
-  -e TEMPORAL_HOST=host.docker.internal:7233 \
-  -e TEMPORAL_NAMESPACE=default \
-  -e TEMPORAL_TASK_QUEUE=DISCOVERY_TASK_QUEUE \
+  -e GRPC_SERVICE_ADDRESS=localhost:50051 \
+  -e API_PORT=8080 \
   bff-api:latest
-
-# Run Worker container
-docker run \
-  -e TEMPORAL_HOST=host.docker.internal:7233 \
-  -e TEMPORAL_NAMESPACE=default \
-  -e TEMPORAL_TASK_QUEUE=DISCOVERY_TASK_QUEUE \
-  bff-worker:latest
 ```
 
 ## API Endpoints
@@ -279,9 +242,6 @@ Configuration can be set via environment variables. The recommended approach is 
 ### Environment Variables
 
 - `ENV`: Environment mode - "development" or "dev" for dev logger, otherwise production (default: production)
-- `TEMPORAL_HOST`: Temporal server host (default: localhost:7233)
-- `TEMPORAL_NAMESPACE`: Temporal namespace (default: default)
-- `TEMPORAL_TASK_QUEUE`: Temporal task queue name (default: DISCOVERY_TASK_QUEUE)
 - `GRPC_SERVICE_ADDRESS`: gRPC service address (default: localhost:50051)
 - `API_PORT`: API server port (default: 8080)
 
@@ -324,9 +284,6 @@ Rebuild and restart services:
 ```bash
 docker-compose up -d --build
 ```
-
-Access Temporal UI:
-- Open `http://localhost:8088` in your browser
 
 View service status:
 ```bash
