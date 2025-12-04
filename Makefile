@@ -1,4 +1,4 @@
-.PHONY: build run-api run-worker test clean generate docker-build docker-up docker-down docker-logs docker-clean env
+.PHONY: build run-api run-worker test clean generate swagger swagger-clean docker-build docker-up docker-down docker-logs docker-clean env
 
 # Build all binaries
 build:
@@ -30,6 +30,16 @@ generate:
 		--go-grpc_out=proto/discovery/gen \
 		--go-grpc_opt=paths=source_relative \
 		proto/discovery/discovery.proto
+
+# Generate Swagger docs using swaggo
+swagger:
+	@echo "Generating Swagger docs with swag..."
+	@swag init -g cmd/api/main.go -o internal/docs
+
+# Clean generated Swagger docs
+swagger-clean:
+	@echo "Cleaning generated Swagger docs..."
+	@rm -rf internal/docs/*.go
 
 # Clean build artifacts
 clean:

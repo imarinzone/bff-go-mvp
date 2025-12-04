@@ -1,0 +1,1568 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "Backend-for-frontend for EV charging flows.",
+        "title": "EV Charging BFF API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "paths": {
+        "/v1/estimate": {
+            "post": {
+                "description": "Returns an estimated cost, duration, and other pricing details for a charging session.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Estimate"
+                ],
+                "summary": "Get charging cost and time estimate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique transaction identifier",
+                        "name": "X-Transaction-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Estimate request payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.EstimateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.EstimateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/orders/{order_id}": {
+            "get": {
+                "description": "Returns current status and details of an order.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get order details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique transaction identifier",
+                        "name": "X-Transaction-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Backend provider identifier",
+                        "name": "X-Bpp-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.OrderResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/orders/{order_id}/cancel": {
+            "get": {
+                "description": "Returns an estimate of fees applicable if the order is cancelled.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Estimate cancellation charges",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique transaction identifier",
+                        "name": "X-Transaction-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Backend provider identifier",
+                        "name": "X-Bpp-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Activity context for cancellation",
+                        "name": "activity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Reason description for cancellation",
+                        "name": "cancel_reason",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Reason code for cancellation",
+                        "name": "cancel_code",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CancelEstimateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Cancels an order and returns the final cancellation outcome.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Cancel an order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique transaction identifier",
+                        "name": "X-Transaction-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Backend provider identifier",
+                        "name": "X-Bpp-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Optional cancellation payload",
+                        "name": "request",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/model.CancelResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/orders/{order_id}/payment": {
+            "post": {
+                "description": "Initiates a payment flow for the specified order.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payment"
+                ],
+                "summary": "Initiate payment for an order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique transaction identifier",
+                        "name": "X-Transaction-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Backend provider identifier",
+                        "name": "X-Bpp-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Payment initiation payload",
+                        "name": "request",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.PaymentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/orders/{order_id}/rating": {
+            "post": {
+                "description": "Submits a rating and optional feedback comments for a completed order.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Submit rating and feedback for an order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique transaction identifier",
+                        "name": "X-Transaction-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Backend provider identifier",
+                        "name": "X-Bpp-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Rating request payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.RatingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.RatingResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/orders/{order_id}/start": {
+            "put": {
+                "description": "Starts a charging session for an existing order.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Start charging session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique transaction identifier",
+                        "name": "X-Transaction-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Backend provider identifier",
+                        "name": "X-Bpp-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Start charging payload",
+                        "name": "request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/model.StartChargingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/model.StartChargingResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/orders/{order_id}/stop": {
+            "get": {
+                "description": "Returns an estimate of charges and status if the session is stopped now.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Estimate stop charging outcome",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique transaction identifier",
+                        "name": "X-Transaction-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Backend provider identifier",
+                        "name": "X-Bpp-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Activity context for stop",
+                        "name": "activity",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.StopEstimateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Stops an ongoing charging session and returns final pricing information.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Stop charging session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique transaction identifier",
+                        "name": "X-Transaction-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Backend provider identifier",
+                        "name": "X-Bpp-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Optional stop reason payload",
+                        "name": "request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/model.StopChargingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.StopChargingResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/orders/{order_id}/support": {
+            "get": {
+                "description": "Returns support contact channels and metadata for a specific order.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Support"
+                ],
+                "summary": "Get support contact information for an order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique transaction identifier",
+                        "name": "X-Transaction-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Backend provider identifier",
+                        "name": "X-Bpp-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SupportResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/search": {
+            "post": {
+                "description": "Search charging locations/connectors by EVSE ID or geo-coordinates with optional filters.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Search"
+                ],
+                "summary": "Search for EV charging connectors",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default 20, max 100)",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "description": "Search request payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.SearchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SearchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.Address": {
+            "type": "object",
+            "properties": {
+                "geo_coordinates": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Amount": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.ApplicableQuantity": {
+            "type": "object",
+            "properties": {
+                "unitCode": {
+                    "type": "string"
+                },
+                "unitQuantity": {
+                    "type": "number"
+                },
+                "unitText": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.AvailabilityWindow": {
+            "type": "object",
+            "properties": {
+                "endTime": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.BuyerFinderFee": {
+            "type": "object",
+            "properties": {
+                "feeType": {
+                    "type": "string"
+                },
+                "feeValue": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.CancelEstimateResponse": {
+            "type": "object",
+            "properties": {
+                "charging": {
+                    "$ref": "#/definitions/model.ChargingInfo"
+                },
+                "order": {
+                    "$ref": "#/definitions/model.OrderInfo"
+                },
+                "payment": {
+                    "$ref": "#/definitions/model.PaymentInfo"
+                },
+                "priceComponents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.PriceComponentString"
+                    }
+                },
+                "validity": {
+                    "$ref": "#/definitions/model.Validity"
+                }
+            }
+        },
+        "model.CancelResponse": {
+            "type": "object",
+            "properties": {
+                "charging": {
+                    "$ref": "#/definitions/model.ChargingInfo"
+                },
+                "order": {
+                    "$ref": "#/definitions/model.OrderInfo"
+                },
+                "payment": {
+                    "$ref": "#/definitions/model.PaymentInfo"
+                },
+                "priceComponents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.PriceComponentString"
+                    }
+                }
+            }
+        },
+        "model.CancellationFee": {
+            "type": "object",
+            "properties": {
+                "percentage": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CancellationPolicy": {
+            "type": "object",
+            "properties": {
+                "externalRef": {
+                    "$ref": "#/definitions/model.ExternalRef"
+                },
+                "fee": {
+                    "$ref": "#/definitions/model.CancellationFee"
+                }
+            }
+        },
+        "model.Catalog": {
+            "type": "object",
+            "properties": {
+                "connectors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Connector"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "offers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Offer"
+                    }
+                },
+                "provider": {
+                    "$ref": "#/definitions/model.Provider"
+                },
+                "rating": {
+                    "$ref": "#/definitions/model.Rating"
+                }
+            }
+        },
+        "model.ChargingInfo": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ChargingMetric": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "unitCode": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.ChargingTelemetry": {
+            "type": "object",
+            "properties": {
+                "eventTime": {
+                    "type": "string"
+                },
+                "metrics": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ChargingMetric"
+                    }
+                }
+            }
+        },
+        "model.Connector": {
+            "type": "object",
+            "properties": {
+                "availabilityWindow": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.AvailabilityWindow"
+                    }
+                },
+                "connectorAttributes": {
+                    "$ref": "#/definitions/model.ConnectorAttributes"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isActive": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "model.ConnectorAttributes": {
+            "type": "object",
+            "properties": {
+                "amenityFeature": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "chargingSpeed": {
+                    "type": "string"
+                },
+                "connectorFormat": {
+                    "type": "string"
+                },
+                "connectorId": {
+                    "type": "string"
+                },
+                "connectorType": {
+                    "type": "string"
+                },
+                "evseId": {
+                    "type": "string"
+                },
+                "maxPowerKW": {
+                    "type": "number"
+                },
+                "minPowerKW": {
+                    "type": "number"
+                },
+                "ocppId": {
+                    "type": "string"
+                },
+                "parkingType": {
+                    "type": "string"
+                },
+                "powerType": {
+                    "type": "string"
+                },
+                "reservationSupported": {
+                    "type": "boolean"
+                },
+                "roamingNetwork": {
+                    "type": "string"
+                },
+                "socketCount": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Energy": {
+            "type": "object",
+            "properties": {
+                "unit": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.Error": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/model.ErrorBody"
+                }
+            }
+        },
+        "model.ErrorBody": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.EstimateRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "$ref": "#/definitions/model.Amount"
+                },
+                "connector_id": {
+                    "type": "string"
+                },
+                "energy": {
+                    "$ref": "#/definitions/model.Energy"
+                },
+                "evse_id": {
+                    "type": "string"
+                },
+                "offer_id": {
+                    "type": "string"
+                },
+                "time_window": {
+                    "$ref": "#/definitions/model.TimeWindow"
+                },
+                "vehicle": {
+                    "$ref": "#/definitions/model.Vehicle"
+                }
+            }
+        },
+        "model.EstimateResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "$ref": "#/definitions/model.Amount"
+                },
+                "cancellation": {
+                    "$ref": "#/definitions/model.CancellationPolicy"
+                },
+                "durationInMinutes": {
+                    "type": "string"
+                },
+                "energy": {
+                    "$ref": "#/definitions/model.Energy"
+                },
+                "order": {
+                    "$ref": "#/definitions/model.OrderInfo"
+                },
+                "percentageOfBatteryCharged": {
+                    "type": "string"
+                },
+                "priceComponents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.PriceComponent"
+                    }
+                },
+                "validity": {
+                    "$ref": "#/definitions/model.Validity"
+                }
+            }
+        },
+        "model.ExternalRef": {
+            "type": "object",
+            "properties": {
+                "mimetype": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Feedback": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "model.FeedbackForm": {
+            "type": "object",
+            "properties": {
+                "mimeType": {
+                    "type": "string"
+                },
+                "submissionId": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Offer": {
+            "type": "object",
+            "properties": {
+                "acceptedPaymentMethod": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "descriptor": {
+                    "$ref": "#/definitions/model.OfferDescriptor"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "offerAttributes": {
+                    "$ref": "#/definitions/model.OfferAttributes"
+                },
+                "price": {
+                    "$ref": "#/definitions/model.Price"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "validity": {
+                    "$ref": "#/definitions/model.Validity"
+                }
+            }
+        },
+        "model.OfferAttributes": {
+            "type": "object",
+            "properties": {
+                "buyerFinderFee": {
+                    "$ref": "#/definitions/model.BuyerFinderFee"
+                },
+                "idleFeePolicy": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OfferDescriptor": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OrderInfo": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OrderResponse": {
+            "type": "object",
+            "properties": {
+                "charging": {
+                    "$ref": "#/definitions/model.ChargingInfo"
+                },
+                "chargingTelemetry": {
+                    "$ref": "#/definitions/model.ChargingTelemetry"
+                },
+                "connectorId": {
+                    "type": "string"
+                },
+                "connectorType": {
+                    "type": "string"
+                },
+                "order": {
+                    "$ref": "#/definitions/model.OrderInfo"
+                },
+                "payment": {
+                    "$ref": "#/definitions/model.PaymentInfo"
+                },
+                "trackingUrl": {
+                    "type": "string"
+                },
+                "vehicle": {
+                    "$ref": "#/definitions/model.Vehicle"
+                }
+            }
+        },
+        "model.PaymentInfo": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.PaymentResponse": {
+            "type": "object",
+            "properties": {
+                "acceptedPaymentMethod": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "amount": {
+                    "$ref": "#/definitions/model.Amount"
+                },
+                "beneficiaryId": {
+                    "type": "string"
+                },
+                "order": {
+                    "$ref": "#/definitions/model.OrderInfo"
+                },
+                "paymentUrl": {
+                    "type": "string"
+                },
+                "validity": {
+                    "$ref": "#/definitions/model.Validity"
+                }
+            }
+        },
+        "model.Price": {
+            "type": "object",
+            "properties": {
+                "applicableQuantity": {
+                    "$ref": "#/definitions/model.ApplicableQuantity"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.PriceComponent": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.PriceComponentFlexible": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "value": {}
+            }
+        },
+        "model.PriceComponentString": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Provider": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "$ref": "#/definitions/model.Address"
+                },
+                "descriptor": {
+                    "$ref": "#/definitions/model.ProviderDescriptor"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ProviderDescriptor": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Rating": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.RatingRequest": {
+            "type": "object",
+            "properties": {
+                "feedback": {
+                    "$ref": "#/definitions/model.Feedback"
+                },
+                "value": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.RatingResponse": {
+            "type": "object",
+            "properties": {
+                "feedbackForm": {
+                    "$ref": "#/definitions/model.FeedbackForm"
+                },
+                "order": {
+                    "$ref": "#/definitions/model.OrderInfo"
+                }
+            }
+        },
+        "model.SearchFilters": {
+            "type": "object",
+            "properties": {
+                "amenities": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "connector_type": {
+                    "type": "string"
+                },
+                "cpo": {
+                    "type": "string"
+                },
+                "max_power_kw": {
+                    "type": "number"
+                },
+                "vehicle": {
+                    "$ref": "#/definitions/model.Vehicle"
+                }
+            }
+        },
+        "model.SearchRequest": {
+            "type": "object",
+            "properties": {
+                "distance_meters": {
+                    "type": "number"
+                },
+                "evse_id": {
+                    "type": "string"
+                },
+                "filters": {
+                    "$ref": "#/definitions/model.SearchFilters"
+                },
+                "geo_coordinates": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "sort": {
+                    "$ref": "#/definitions/model.SearchSort"
+                },
+                "time_window": {
+                    "$ref": "#/definitions/model.TimeWindow"
+                }
+            }
+        },
+        "model.SearchResponse": {
+            "type": "object",
+            "properties": {
+                "catalogs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Catalog"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "per_page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.SearchSort": {
+            "type": "object",
+            "properties": {
+                "order": {
+                    "type": "string"
+                },
+                "sort_by": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.StartChargingRequest": {
+            "type": "object"
+        },
+        "model.StartChargingResponse": {
+            "type": "object",
+            "properties": {
+                "charging": {
+                    "$ref": "#/definitions/model.ChargingInfo"
+                },
+                "order": {
+                    "$ref": "#/definitions/model.OrderInfo"
+                },
+                "payment": {
+                    "$ref": "#/definitions/model.PaymentInfo"
+                }
+            }
+        },
+        "model.StopChargingRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "reasonCode": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.StopChargingResponse": {
+            "type": "object",
+            "properties": {
+                "charging": {
+                    "$ref": "#/definitions/model.ChargingInfo"
+                },
+                "order": {
+                    "$ref": "#/definitions/model.OrderInfo"
+                },
+                "payment": {
+                    "$ref": "#/definitions/model.PaymentInfo"
+                },
+                "priceComponents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.PriceComponentFlexible"
+                    }
+                },
+                "validity": {
+                    "$ref": "#/definitions/model.Validity"
+                }
+            }
+        },
+        "model.StopEstimateResponse": {
+            "type": "object",
+            "properties": {
+                "charging": {
+                    "$ref": "#/definitions/model.ChargingInfo"
+                },
+                "order": {
+                    "$ref": "#/definitions/model.OrderInfo"
+                },
+                "payment": {
+                    "$ref": "#/definitions/model.PaymentInfo"
+                },
+                "priceComponents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.PriceComponentString"
+                    }
+                },
+                "validity": {
+                    "$ref": "#/definitions/model.Validity"
+                }
+            }
+        },
+        "model.SupportResponse": {
+            "type": "object",
+            "properties": {
+                "channels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "email": {
+                    "type": "string"
+                },
+                "hours": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "order": {
+                    "$ref": "#/definitions/model.OrderInfo"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.TimeWindow": {
+            "type": "object",
+            "properties": {
+                "end": {
+                    "type": "string"
+                },
+                "start": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Validity": {
+            "type": "object",
+            "properties": {
+                "endDate": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Vehicle": {
+            "type": "object",
+            "properties": {
+                "make": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

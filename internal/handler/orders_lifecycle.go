@@ -26,6 +26,21 @@ func NewOrdersLifecycleHandler(service orders.LifecycleService, logger *zap.Logg
 }
 
 // EstimateCancel handles GET /v1/orders/{order_id}/cancel.
+// @Summary Estimate cancellation charges
+// @Description Returns an estimate of fees applicable if the order is cancelled.
+// @Tags Orders
+// @Accept json
+// @Produce json
+// @Param X-Transaction-Id header string true "Unique transaction identifier"
+// @Param X-Bpp-Id header string true "Backend provider identifier"
+// @Param order_id path string true "Order ID"
+// @Param activity query string false "Activity context for cancellation"
+// @Param cancel_reason query string false "Reason description for cancellation"
+// @Param cancel_code query string false "Reason code for cancellation"
+// @Success 200 {object} model.CancelEstimateResponse
+// @Failure 400 {object} model.Error
+// @Failure 500 {object} model.Error
+// @Router /v1/orders/{order_id}/cancel [get]
 func (h *OrdersLifecycleHandler) EstimateCancel(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		httpx.WriteError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Method not allowed")
@@ -53,6 +68,19 @@ func (h *OrdersLifecycleHandler) EstimateCancel(w http.ResponseWriter, r *http.R
 }
 
 // Cancel handles POST /v1/orders/{order_id}/cancel.
+// @Summary Cancel an order
+// @Description Cancels an order and returns the final cancellation outcome.
+// @Tags Orders
+// @Accept json
+// @Produce json
+// @Param X-Transaction-Id header string true "Unique transaction identifier"
+// @Param X-Bpp-Id header string true "Backend provider identifier"
+// @Param order_id path string true "Order ID"
+// @Param request body object false "Optional cancellation payload"
+// @Success 202 {object} model.CancelResponse
+// @Failure 400 {object} model.Error
+// @Failure 500 {object} model.Error
+// @Router /v1/orders/{order_id}/cancel [post]
 func (h *OrdersLifecycleHandler) Cancel(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		httpx.WriteError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Method not allowed")
@@ -84,6 +112,19 @@ func (h *OrdersLifecycleHandler) Cancel(w http.ResponseWriter, r *http.Request) 
 }
 
 // EstimateStop handles GET /v1/orders/{order_id}/stop.
+// @Summary Estimate stop charging outcome
+// @Description Returns an estimate of charges and status if the session is stopped now.
+// @Tags Orders
+// @Accept json
+// @Produce json
+// @Param X-Transaction-Id header string true "Unique transaction identifier"
+// @Param X-Bpp-Id header string true "Backend provider identifier"
+// @Param order_id path string true "Order ID"
+// @Param activity query string false "Activity context for stop"
+// @Success 200 {object} model.StopEstimateResponse
+// @Failure 400 {object} model.Error
+// @Failure 500 {object} model.Error
+// @Router /v1/orders/{order_id}/stop [get]
 func (h *OrdersLifecycleHandler) EstimateStop(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		httpx.WriteError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Method not allowed")
@@ -108,6 +149,19 @@ func (h *OrdersLifecycleHandler) EstimateStop(w http.ResponseWriter, r *http.Req
 }
 
 // StopCharging handles PUT /v1/orders/{order_id}/stop.
+// @Summary Stop charging session
+// @Description Stops an ongoing charging session and returns final pricing information.
+// @Tags Orders
+// @Accept json
+// @Produce json
+// @Param X-Transaction-Id header string true "Unique transaction identifier"
+// @Param X-Bpp-Id header string true "Backend provider identifier"
+// @Param order_id path string true "Order ID"
+// @Param request body model.StopChargingRequest false "Optional stop reason payload"
+// @Success 200 {object} model.StopChargingResponse
+// @Failure 400 {object} model.Error
+// @Failure 500 {object} model.Error
+// @Router /v1/orders/{order_id}/stop [put]
 func (h *OrdersLifecycleHandler) StopCharging(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		httpx.WriteError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Method not allowed")
@@ -139,6 +193,19 @@ func (h *OrdersLifecycleHandler) StopCharging(w http.ResponseWriter, r *http.Req
 }
 
 // StartCharging handles PUT /v1/orders/{order_id}/start.
+// @Summary Start charging session
+// @Description Starts a charging session for an existing order.
+// @Tags Orders
+// @Accept json
+// @Produce json
+// @Param X-Transaction-Id header string true "Unique transaction identifier"
+// @Param X-Bpp-Id header string true "Backend provider identifier"
+// @Param order_id path string true "Order ID"
+// @Param request body model.StartChargingRequest false "Start charging payload"
+// @Success 202 {object} model.StartChargingResponse
+// @Failure 400 {object} model.Error
+// @Failure 500 {object} model.Error
+// @Router /v1/orders/{order_id}/start [put]
 func (h *OrdersLifecycleHandler) StartCharging(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		httpx.WriteError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Method not allowed")
@@ -191,5 +258,3 @@ func (h *OrdersLifecycleHandler) writeStandardHeaders(w http.ResponseWriter, txn
 	w.Header().Set("X-Transaction-Id", txnID)
 	w.Header().Set("X-Bpp-Id", bppID)
 }
-
-

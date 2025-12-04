@@ -25,6 +25,17 @@ func NewEstimateHandler(service estimate.Service, logger *zap.Logger) *EstimateH
 }
 
 // GetEstimates handles the estimate API.
+// @Summary Get charging cost and time estimate
+// @Description Returns an estimated cost, duration, and other pricing details for a charging session.
+// @Tags Estimate
+// @Accept json
+// @Produce json
+// @Param X-Transaction-Id header string true "Unique transaction identifier"
+// @Param request body model.EstimateRequest true "Estimate request payload"
+// @Success 200 {object} model.EstimateResponse
+// @Failure 400 {object} model.Error
+// @Failure 500 {object} model.Error
+// @Router /v1/estimate [post]
 func (h *EstimateHandler) GetEstimates(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		httpx.WriteError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Method not allowed")
@@ -63,5 +74,3 @@ func (h *EstimateHandler) GetEstimates(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Bpp-Id", "mock-bpp-id")
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
-
-

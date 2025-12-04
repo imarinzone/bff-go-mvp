@@ -8,6 +8,7 @@ import (
 
 	"bff-go-mvp/internal/domain/orders"
 	"bff-go-mvp/internal/httpx"
+	"bff-go-mvp/internal/model"
 )
 
 // OrdersHandler handles order-related endpoints.
@@ -24,6 +25,18 @@ func NewOrdersHandler(service orders.Service, logger *zap.Logger) *OrdersHandler
 }
 
 // GetOrder handles GET /v1/orders/{order_id}.
+// @Summary Get order details
+// @Description Returns current status and details of an order.
+// @Tags Orders
+// @Accept json
+// @Produce json
+// @Param X-Transaction-Id header string true "Unique transaction identifier"
+// @Param X-Bpp-Id header string true "Backend provider identifier"
+// @Param order_id path string true "Order ID"
+// @Success 200 {object} model.OrderResponse
+// @Failure 400 {object} model.Error
+// @Failure 500 {object} model.Error
+// @Router /v1/orders/{order_id} [get]
 func (h *OrdersHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		httpx.WriteError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Method not allowed")
@@ -58,4 +71,6 @@ func (h *OrdersHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
-
+// keep model types referenced for Swagger annotations
+var _ model.OrderResponse
+var _ model.Error

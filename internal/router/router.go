@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 
 	"bff-go-mvp/internal/api"
@@ -66,6 +67,10 @@ func New(cfg *config.Config, logger *zap.Logger) *mux.Router {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("OK"))
 	}).Methods(http.MethodGet)
+
+	// Swagger UI (served by swaggo/http-swagger).
+	// The docs are registered via the blank import of `internal/docs` in cmd/api/main.go.
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	return r
 }

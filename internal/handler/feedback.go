@@ -26,6 +26,19 @@ func NewFeedbackHandler(service feedback.Service, logger *zap.Logger) *FeedbackH
 }
 
 // SetOrderRating handles POST /v1/orders/{order_id}/rating.
+// @Summary Submit rating and feedback for an order
+// @Description Submits a rating and optional feedback comments for a completed order.
+// @Tags Feedback
+// @Accept json
+// @Produce json
+// @Param X-Transaction-Id header string true "Unique transaction identifier"
+// @Param X-Bpp-Id header string true "Backend provider identifier"
+// @Param order_id path string true "Order ID"
+// @Param request body model.RatingRequest true "Rating request payload"
+// @Success 201 {object} model.RatingResponse
+// @Failure 400 {object} model.Error
+// @Failure 500 {object} model.Error
+// @Router /v1/orders/{order_id}/rating [post]
 func (h *FeedbackHandler) SetOrderRating(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		httpx.WriteError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Method not allowed")
@@ -69,5 +82,3 @@ func (h *FeedbackHandler) SetOrderRating(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("X-Bpp-Id", bppID)
 	httpx.WriteJSON(w, http.StatusCreated, resp)
 }
-
-

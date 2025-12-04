@@ -15,10 +15,6 @@ import (
 	"bff-go-mvp/internal/router"
 )
 
-func newTestRouter() *http.ServeMux {
-	return nil
-}
-
 func buildRouter() http.Handler {
 	logger := zap.NewNop()
 	cfg := config.Load()
@@ -88,5 +84,3 @@ func TestOrdersLifecycle_Start_Stop_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "COMPLETED", stopResp.Order.Status)
 }
-
-

@@ -1,0 +1,1034 @@
+basePath: /
+definitions:
+  model.Address:
+    properties:
+      geo_coordinates:
+        items:
+          type: number
+        type: array
+      name:
+        type: string
+    type: object
+  model.Amount:
+    properties:
+      currency:
+        type: string
+      value:
+        type: number
+    type: object
+  model.ApplicableQuantity:
+    properties:
+      unitCode:
+        type: string
+      unitQuantity:
+        type: number
+      unitText:
+        type: string
+    type: object
+  model.AvailabilityWindow:
+    properties:
+      endTime:
+        type: string
+      startTime:
+        type: string
+    type: object
+  model.BuyerFinderFee:
+    properties:
+      feeType:
+        type: string
+      feeValue:
+        type: number
+    type: object
+  model.CancelEstimateResponse:
+    properties:
+      charging:
+        $ref: '#/definitions/model.ChargingInfo'
+      order:
+        $ref: '#/definitions/model.OrderInfo'
+      payment:
+        $ref: '#/definitions/model.PaymentInfo'
+      priceComponents:
+        items:
+          $ref: '#/definitions/model.PriceComponentString'
+        type: array
+      validity:
+        $ref: '#/definitions/model.Validity'
+    type: object
+  model.CancelResponse:
+    properties:
+      charging:
+        $ref: '#/definitions/model.ChargingInfo'
+      order:
+        $ref: '#/definitions/model.OrderInfo'
+      payment:
+        $ref: '#/definitions/model.PaymentInfo'
+      priceComponents:
+        items:
+          $ref: '#/definitions/model.PriceComponentString'
+        type: array
+    type: object
+  model.CancellationFee:
+    properties:
+      percentage:
+        type: string
+    type: object
+  model.CancellationPolicy:
+    properties:
+      externalRef:
+        $ref: '#/definitions/model.ExternalRef'
+      fee:
+        $ref: '#/definitions/model.CancellationFee'
+    type: object
+  model.Catalog:
+    properties:
+      connectors:
+        items:
+          $ref: '#/definitions/model.Connector'
+        type: array
+      id:
+        type: string
+      offers:
+        items:
+          $ref: '#/definitions/model.Offer'
+        type: array
+      provider:
+        $ref: '#/definitions/model.Provider'
+      rating:
+        $ref: '#/definitions/model.Rating'
+    type: object
+  model.ChargingInfo:
+    properties:
+      status:
+        type: string
+    type: object
+  model.ChargingMetric:
+    properties:
+      name:
+        type: string
+      unitCode:
+        type: string
+      value:
+        type: number
+    type: object
+  model.ChargingTelemetry:
+    properties:
+      eventTime:
+        type: string
+      metrics:
+        items:
+          $ref: '#/definitions/model.ChargingMetric'
+        type: array
+    type: object
+  model.Connector:
+    properties:
+      availabilityWindow:
+        items:
+          $ref: '#/definitions/model.AvailabilityWindow'
+        type: array
+      connectorAttributes:
+        $ref: '#/definitions/model.ConnectorAttributes'
+      id:
+        type: string
+      isActive:
+        type: boolean
+    type: object
+  model.ConnectorAttributes:
+    properties:
+      amenityFeature:
+        items:
+          type: string
+        type: array
+      chargingSpeed:
+        type: string
+      connectorFormat:
+        type: string
+      connectorId:
+        type: string
+      connectorType:
+        type: string
+      evseId:
+        type: string
+      maxPowerKW:
+        type: number
+      minPowerKW:
+        type: number
+      ocppId:
+        type: string
+      parkingType:
+        type: string
+      powerType:
+        type: string
+      reservationSupported:
+        type: boolean
+      roamingNetwork:
+        type: string
+      socketCount:
+        type: integer
+      status:
+        type: string
+    type: object
+  model.Energy:
+    properties:
+      unit:
+        type: string
+      value:
+        type: number
+    type: object
+  model.Error:
+    properties:
+      error:
+        $ref: '#/definitions/model.ErrorBody'
+    type: object
+  model.ErrorBody:
+    properties:
+      code:
+        type: string
+      details:
+        additionalProperties: true
+        type: object
+      message:
+        type: string
+    type: object
+  model.EstimateRequest:
+    properties:
+      amount:
+        $ref: '#/definitions/model.Amount'
+      connector_id:
+        type: string
+      energy:
+        $ref: '#/definitions/model.Energy'
+      evse_id:
+        type: string
+      offer_id:
+        type: string
+      time_window:
+        $ref: '#/definitions/model.TimeWindow'
+      vehicle:
+        $ref: '#/definitions/model.Vehicle'
+    type: object
+  model.EstimateResponse:
+    properties:
+      amount:
+        $ref: '#/definitions/model.Amount'
+      cancellation:
+        $ref: '#/definitions/model.CancellationPolicy'
+      durationInMinutes:
+        type: string
+      energy:
+        $ref: '#/definitions/model.Energy'
+      order:
+        $ref: '#/definitions/model.OrderInfo'
+      percentageOfBatteryCharged:
+        type: string
+      priceComponents:
+        items:
+          $ref: '#/definitions/model.PriceComponent'
+        type: array
+      validity:
+        $ref: '#/definitions/model.Validity'
+    type: object
+  model.ExternalRef:
+    properties:
+      mimetype:
+        type: string
+      url:
+        type: string
+    type: object
+  model.Feedback:
+    properties:
+      comments:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+  model.FeedbackForm:
+    properties:
+      mimeType:
+        type: string
+      submissionId:
+        type: string
+      url:
+        type: string
+    type: object
+  model.Offer:
+    properties:
+      acceptedPaymentMethod:
+        items:
+          type: string
+        type: array
+      descriptor:
+        $ref: '#/definitions/model.OfferDescriptor'
+      id:
+        type: string
+      items:
+        items:
+          type: string
+        type: array
+      offerAttributes:
+        $ref: '#/definitions/model.OfferAttributes'
+      price:
+        $ref: '#/definitions/model.Price'
+      provider:
+        type: string
+      validity:
+        $ref: '#/definitions/model.Validity'
+    type: object
+  model.OfferAttributes:
+    properties:
+      buyerFinderFee:
+        $ref: '#/definitions/model.BuyerFinderFee'
+      idleFeePolicy:
+        type: string
+    type: object
+  model.OfferDescriptor:
+    properties:
+      name:
+        type: string
+    type: object
+  model.OrderInfo:
+    properties:
+      id:
+        type: string
+      mode:
+        type: string
+      status:
+        type: string
+    type: object
+  model.OrderResponse:
+    properties:
+      charging:
+        $ref: '#/definitions/model.ChargingInfo'
+      chargingTelemetry:
+        $ref: '#/definitions/model.ChargingTelemetry'
+      connectorId:
+        type: string
+      connectorType:
+        type: string
+      order:
+        $ref: '#/definitions/model.OrderInfo'
+      payment:
+        $ref: '#/definitions/model.PaymentInfo'
+      trackingUrl:
+        type: string
+      vehicle:
+        $ref: '#/definitions/model.Vehicle'
+    type: object
+  model.PaymentInfo:
+    properties:
+      status:
+        type: string
+    type: object
+  model.PaymentResponse:
+    properties:
+      acceptedPaymentMethod:
+        items:
+          type: string
+        type: array
+      amount:
+        $ref: '#/definitions/model.Amount'
+      beneficiaryId:
+        type: string
+      order:
+        $ref: '#/definitions/model.OrderInfo'
+      paymentUrl:
+        type: string
+      validity:
+        $ref: '#/definitions/model.Validity'
+    type: object
+  model.Price:
+    properties:
+      applicableQuantity:
+        $ref: '#/definitions/model.ApplicableQuantity'
+      currency:
+        type: string
+      value:
+        type: number
+    type: object
+  model.PriceComponent:
+    properties:
+      currency:
+        type: string
+      description:
+        type: string
+      type:
+        type: string
+      value:
+        type: number
+    type: object
+  model.PriceComponentFlexible:
+    properties:
+      currency:
+        type: string
+      description:
+        type: string
+      type:
+        type: string
+      value: {}
+    type: object
+  model.PriceComponentString:
+    properties:
+      currency:
+        type: string
+      description:
+        type: string
+      type:
+        type: string
+      value:
+        type: string
+    type: object
+  model.Provider:
+    properties:
+      address:
+        $ref: '#/definitions/model.Address'
+      descriptor:
+        $ref: '#/definitions/model.ProviderDescriptor'
+      id:
+        type: string
+    type: object
+  model.ProviderDescriptor:
+    properties:
+      name:
+        type: string
+    type: object
+  model.Rating:
+    properties:
+      count:
+        type: integer
+      value:
+        type: number
+    type: object
+  model.RatingRequest:
+    properties:
+      feedback:
+        $ref: '#/definitions/model.Feedback'
+      value:
+        type: integer
+    type: object
+  model.RatingResponse:
+    properties:
+      feedbackForm:
+        $ref: '#/definitions/model.FeedbackForm'
+      order:
+        $ref: '#/definitions/model.OrderInfo'
+    type: object
+  model.SearchFilters:
+    properties:
+      amenities:
+        items:
+          type: string
+        type: array
+      connector_type:
+        type: string
+      cpo:
+        type: string
+      max_power_kw:
+        type: number
+      vehicle:
+        $ref: '#/definitions/model.Vehicle'
+    type: object
+  model.SearchRequest:
+    properties:
+      distance_meters:
+        type: number
+      evse_id:
+        type: string
+      filters:
+        $ref: '#/definitions/model.SearchFilters'
+      geo_coordinates:
+        items:
+          type: number
+        type: array
+      sort:
+        $ref: '#/definitions/model.SearchSort'
+      time_window:
+        $ref: '#/definitions/model.TimeWindow'
+    type: object
+  model.SearchResponse:
+    properties:
+      catalogs:
+        items:
+          $ref: '#/definitions/model.Catalog'
+        type: array
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  model.SearchSort:
+    properties:
+      order:
+        type: string
+      sort_by:
+        type: string
+    type: object
+  model.StartChargingRequest:
+    type: object
+  model.StartChargingResponse:
+    properties:
+      charging:
+        $ref: '#/definitions/model.ChargingInfo'
+      order:
+        $ref: '#/definitions/model.OrderInfo'
+      payment:
+        $ref: '#/definitions/model.PaymentInfo'
+    type: object
+  model.StopChargingRequest:
+    properties:
+      message:
+        type: string
+      reasonCode:
+        type: string
+    type: object
+  model.StopChargingResponse:
+    properties:
+      charging:
+        $ref: '#/definitions/model.ChargingInfo'
+      order:
+        $ref: '#/definitions/model.OrderInfo'
+      payment:
+        $ref: '#/definitions/model.PaymentInfo'
+      priceComponents:
+        items:
+          $ref: '#/definitions/model.PriceComponentFlexible'
+        type: array
+      validity:
+        $ref: '#/definitions/model.Validity'
+    type: object
+  model.StopEstimateResponse:
+    properties:
+      charging:
+        $ref: '#/definitions/model.ChargingInfo'
+      order:
+        $ref: '#/definitions/model.OrderInfo'
+      payment:
+        $ref: '#/definitions/model.PaymentInfo'
+      priceComponents:
+        items:
+          $ref: '#/definitions/model.PriceComponentString'
+        type: array
+      validity:
+        $ref: '#/definitions/model.Validity'
+    type: object
+  model.SupportResponse:
+    properties:
+      channels:
+        items:
+          type: string
+        type: array
+      email:
+        type: string
+      hours:
+        type: string
+      name:
+        type: string
+      order:
+        $ref: '#/definitions/model.OrderInfo'
+      phone:
+        type: string
+      url:
+        type: string
+    type: object
+  model.TimeWindow:
+    properties:
+      end:
+        type: string
+      start:
+        type: string
+    type: object
+  model.Validity:
+    properties:
+      endDate:
+        type: string
+      startDate:
+        type: string
+    type: object
+  model.Vehicle:
+    properties:
+      make:
+        type: string
+      model:
+        type: string
+      type:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Backend-for-frontend for EV charging flows.
+  title: EV Charging BFF API
+  version: "1.0"
+paths:
+  /v1/estimate:
+    post:
+      consumes:
+      - application/json
+      description: Returns an estimated cost, duration, and other pricing details
+        for a charging session.
+      parameters:
+      - description: Unique transaction identifier
+        in: header
+        name: X-Transaction-Id
+        required: true
+        type: string
+      - description: Estimate request payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.EstimateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.EstimateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get charging cost and time estimate
+      tags:
+      - Estimate
+  /v1/orders/{order_id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns current status and details of an order.
+      parameters:
+      - description: Unique transaction identifier
+        in: header
+        name: X-Transaction-Id
+        required: true
+        type: string
+      - description: Backend provider identifier
+        in: header
+        name: X-Bpp-Id
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.OrderResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get order details
+      tags:
+      - Orders
+  /v1/orders/{order_id}/cancel:
+    get:
+      consumes:
+      - application/json
+      description: Returns an estimate of fees applicable if the order is cancelled.
+      parameters:
+      - description: Unique transaction identifier
+        in: header
+        name: X-Transaction-Id
+        required: true
+        type: string
+      - description: Backend provider identifier
+        in: header
+        name: X-Bpp-Id
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      - description: Activity context for cancellation
+        in: query
+        name: activity
+        type: string
+      - description: Reason description for cancellation
+        in: query
+        name: cancel_reason
+        type: string
+      - description: Reason code for cancellation
+        in: query
+        name: cancel_code
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CancelEstimateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Estimate cancellation charges
+      tags:
+      - Orders
+    post:
+      consumes:
+      - application/json
+      description: Cancels an order and returns the final cancellation outcome.
+      parameters:
+      - description: Unique transaction identifier
+        in: header
+        name: X-Transaction-Id
+        required: true
+        type: string
+      - description: Backend provider identifier
+        in: header
+        name: X-Bpp-Id
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      - description: Optional cancellation payload
+        in: body
+        name: request
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/model.CancelResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Cancel an order
+      tags:
+      - Orders
+  /v1/orders/{order_id}/payment:
+    post:
+      consumes:
+      - application/json
+      description: Initiates a payment flow for the specified order.
+      parameters:
+      - description: Unique transaction identifier
+        in: header
+        name: X-Transaction-Id
+        required: true
+        type: string
+      - description: Backend provider identifier
+        in: header
+        name: X-Bpp-Id
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      - description: Payment initiation payload
+        in: body
+        name: request
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PaymentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Initiate payment for an order
+      tags:
+      - Payment
+  /v1/orders/{order_id}/rating:
+    post:
+      consumes:
+      - application/json
+      description: Submits a rating and optional feedback comments for a completed
+        order.
+      parameters:
+      - description: Unique transaction identifier
+        in: header
+        name: X-Transaction-Id
+        required: true
+        type: string
+      - description: Backend provider identifier
+        in: header
+        name: X-Bpp-Id
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      - description: Rating request payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.RatingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.RatingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Submit rating and feedback for an order
+      tags:
+      - Feedback
+  /v1/orders/{order_id}/start:
+    put:
+      consumes:
+      - application/json
+      description: Starts a charging session for an existing order.
+      parameters:
+      - description: Unique transaction identifier
+        in: header
+        name: X-Transaction-Id
+        required: true
+        type: string
+      - description: Backend provider identifier
+        in: header
+        name: X-Bpp-Id
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      - description: Start charging payload
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/model.StartChargingRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/model.StartChargingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Start charging session
+      tags:
+      - Orders
+  /v1/orders/{order_id}/stop:
+    get:
+      consumes:
+      - application/json
+      description: Returns an estimate of charges and status if the session is stopped
+        now.
+      parameters:
+      - description: Unique transaction identifier
+        in: header
+        name: X-Transaction-Id
+        required: true
+        type: string
+      - description: Backend provider identifier
+        in: header
+        name: X-Bpp-Id
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      - description: Activity context for stop
+        in: query
+        name: activity
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.StopEstimateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Estimate stop charging outcome
+      tags:
+      - Orders
+    put:
+      consumes:
+      - application/json
+      description: Stops an ongoing charging session and returns final pricing information.
+      parameters:
+      - description: Unique transaction identifier
+        in: header
+        name: X-Transaction-Id
+        required: true
+        type: string
+      - description: Backend provider identifier
+        in: header
+        name: X-Bpp-Id
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      - description: Optional stop reason payload
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/model.StopChargingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.StopChargingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Stop charging session
+      tags:
+      - Orders
+  /v1/orders/{order_id}/support:
+    get:
+      consumes:
+      - application/json
+      description: Returns support contact channels and metadata for a specific order.
+      parameters:
+      - description: Unique transaction identifier
+        in: header
+        name: X-Transaction-Id
+        required: true
+        type: string
+      - description: Backend provider identifier
+        in: header
+        name: X-Bpp-Id
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SupportResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get support contact information for an order
+      tags:
+      - Support
+  /v1/search:
+    post:
+      consumes:
+      - application/json
+      description: Search charging locations/connectors by EVSE ID or geo-coordinates
+        with optional filters.
+      parameters:
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Items per page (default 20, max 100)
+        in: query
+        name: per_page
+        type: integer
+      - description: Search request payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.SearchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SearchResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Search for EV charging connectors
+      tags:
+      - Search
+schemes:
+- http
+swagger: "2.0"

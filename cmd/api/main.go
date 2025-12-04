@@ -12,10 +12,16 @@ import (
 	"go.uber.org/zap"
 
 	"bff-go-mvp/internal/config"
+	_ "bff-go-mvp/internal/docs" // swagger docs
 	"bff-go-mvp/internal/logger"
 	"bff-go-mvp/internal/router"
 )
 
+// @title EV Charging BFF API
+// @version 1.0
+// @description Backend-for-frontend for EV charging flows.
+// @BasePath /
+// @schemes http
 func main() {
 	// Initialize logger
 	zapLogger, err := logger.NewLogger(os.Getenv("ENV"))
@@ -29,6 +35,9 @@ func main() {
 
 	// Setup router with all endpoints
 	r := router.New(cfg, zapLogger)
+
+	// Optionally log where Swagger UI is exposed.
+	zapLogger.Info("Swagger UI available", zap.String("url", "/swagger/index.html"))
 
 	// Start server
 	serverAddr := fmt.Sprintf(":%s", cfg.API.Port)

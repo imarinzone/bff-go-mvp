@@ -8,6 +8,7 @@ import (
 
 	"bff-go-mvp/internal/domain/support"
 	"bff-go-mvp/internal/httpx"
+	"bff-go-mvp/internal/model"
 )
 
 // SupportHandler handles GET /v1/orders/{order_id}/support.
@@ -23,6 +24,19 @@ func NewSupportHandler(service support.Service, logger *zap.Logger) *SupportHand
 	}
 }
 
+// GetOrderSupport handles GET /v1/orders/{order_id}/support.
+// @Summary Get support contact information for an order
+// @Description Returns support contact channels and metadata for a specific order.
+// @Tags Support
+// @Accept json
+// @Produce json
+// @Param X-Transaction-Id header string true "Unique transaction identifier"
+// @Param X-Bpp-Id header string true "Backend provider identifier"
+// @Param order_id path string true "Order ID"
+// @Success 200 {object} model.SupportResponse
+// @Failure 400 {object} model.Error
+// @Failure 500 {object} model.Error
+// @Router /v1/orders/{order_id}/support [get]
 func (h *SupportHandler) GetOrderSupport(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		httpx.WriteError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Method not allowed")
@@ -55,4 +69,6 @@ func (h *SupportHandler) GetOrderSupport(w http.ResponseWriter, r *http.Request)
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
-
+// keep model types referenced for Swagger annotations
+var _ model.SupportResponse
+var _ model.Error

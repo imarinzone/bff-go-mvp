@@ -26,6 +26,18 @@ func NewSearchHandler(service search.Service, logger *zap.Logger) *SearchHandler
 }
 
 // SearchChargingConnectors handles the search API.
+// @Summary Search for EV charging connectors
+// @Description Search charging locations/connectors by EVSE ID or geo-coordinates with optional filters.
+// @Tags Search
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number (default 1)"
+// @Param per_page query int false "Items per page (default 20, max 100)"
+// @Param request body model.SearchRequest true "Search request payload"
+// @Success 200 {object} model.SearchResponse
+// @Failure 400 {object} model.Error
+// @Failure 500 {object} model.Error
+// @Router /v1/search [post]
 func (h *SearchHandler) SearchChargingConnectors(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		httpx.WriteError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Method not allowed")
@@ -80,5 +92,3 @@ func (h *SearchHandler) SearchChargingConnectors(w http.ResponseWriter, r *http.
 	w.Header().Set("X-Transaction-Id", "mock-transaction-id")
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
-
-

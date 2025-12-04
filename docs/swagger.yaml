@@ -1,0 +1,2797 @@
+openapi: 3.0.0
+info:
+  title: APIServiceGo
+  version: 1.0.0
+  description: EV Charging API for searching charging connectors, getting estimates, managing orders, and processing payments for electric vehicle charging sessions.
+servers:
+  - url: http://{{localhost}}
+paths:
+  /v1/search:
+    post:
+      operationId: searchChargingConnectors
+      summary: Search Charging Connectors
+      tags:
+        - Discovery
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination.
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: per_page
+          in: query
+          description: Page size for pagination.
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: OK
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+              example:
+                total: 1
+                page: 1
+                per_page: 100
+                catalogs:
+                  - id: catalog-ev-charging-001
+                    provider:
+                      id: ecopower-charging
+                      descriptor:
+                        name: EcoPower Charging Pvt Ltd
+                      address:
+                        name: MG JVLR Jogeshwari Caves Road
+                        geo_coordinates: [12.9716, 77.5946]
+                    rating:
+                      value: 4.5
+                      count: 128
+                    connectors:
+                      - id: ev-charger-ccs2-001
+                        isActive: true
+                        availabilityWindow:
+                          - startTime: "06:00:00"
+                            endTime: "22:00:00"
+                        price:
+                          value: "8"
+                          currency: "INR/kWH"
+                        connectorAttributes:
+                          connectorType: TYPE_2
+                          maxPowerKW: 60
+                          minPowerKW: 5
+                          socketCount: 2
+                          reservationSupported: true
+                          status: Available
+                          chargingSpeed: FAST
+                          powerType: DC
+                          connectorFormat: CABLE
+                    offers:
+                      - id: offer-ccs2-60kw-kwh
+                        descriptor:
+                          name: Per-kWh Tariff - CCS2 60kW
+                        items:
+                          - ev-charger-ccs2-001
+                        price:
+                          currency: INR
+                          value: 18
+                          applicableQuantity:
+                            unitText: Kilowatt Hour
+                            unitCode: KWH
+                            unitQuantity: 1
+                        validity:
+                          startDate: "2025-10-01T00:00:00Z"
+                          endDate: "2026-03-31T23:59:59Z"
+                        acceptedPaymentMethod:
+                          - UPI
+                          - Card
+                          - Wallet
+                        offerAttributes:
+                          buyerFinderFee:
+                            feeType: PERCENTAGE
+                            feeValue: 2.5
+                          idleFeePolicy: ₹2/min after 10 min post-charge
+                        provider: ecopower-charging
+                      - id: offer-ccs2-120kw-kwh
+                        descriptor:
+                          name: Per-kWh Tariff - CCS2 120kW
+                        items:
+                          - ev-charger-ccs2-002
+                        price:
+                          currency: INR
+                          value: 22
+                          applicableQuantity:
+                            unitText: Kilowatt Hour
+                            unitCode: KWH
+                            unitQuantity: 1
+                        validity:
+                          startDate: "2025-10-15T00:00:00Z"
+                          endDate: "2026-04-15T23:59:59Z"
+                        acceptedPaymentMethod:
+                          - UPI
+                          - Card
+                          - Wallet
+                          - NetBanking
+                        offerAttributes:
+                          buyerFinderFee:
+                            feeType: PERCENTAGE
+                            feeValue: 2
+                          idleFeePolicy: ₹3/min after 15 min post-charge
+                        provider: greencharge-koramangala
+                      - id: offer-type2-22kw-kwh
+                        descriptor:
+                          name: Per-kWh Tariff - Type 2 22kW
+                        items:
+                          - ev-charger-type2-001
+                        price:
+                          currency: INR
+                          value: 15
+                          applicableQuantity:
+                            unitText: Kilowatt Hour
+                            unitCode: KWH
+                            unitQuantity: 1
+                        validity:
+                          startDate: "2025-10-20T00:00:00Z"
+                          endDate: "2026-04-20T23:59:59Z"
+                        acceptedPaymentMethod:
+                          - UPI
+                          - Card
+                          - Wallet
+                        offerAttributes:
+                          buyerFinderFee:
+                            feeType: PERCENTAGE
+                            feeValue: 1.5
+                          idleFeePolicy: ₹1/min after 30 min post-charge
+                        provider: powergrid-indiranagar
+        "400":
+          description: Bad Request - Invalid request parameters or malformed request body.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "BAD_REQUEST"
+                  message: "Invalid request parameters or malformed request body."
+        "401":
+          description: Unauthorized - Invalid or missing authentication token.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Invalid or missing authentication token."
+        "422":
+          description: Unprocessable Entity - Validation error in request data.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Validation error in request data."
+        "500":
+          description: Internal Server Error - Server error occurred while processing the request.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "Server error occurred while processing the request."
+      description: >-
+        Search for available charging connectors and offers near a location or
+        by filters. Either evse_id or geo_coordinates with distance_meters is required.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchRequest"
+  /v1/estimate:
+    post:
+      operationId: getEstimates
+      summary: Get Estimates
+      tags:
+        - Discovery
+      parameters:
+        - name: X-Transaction-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EstimateResponse"
+              example:
+                order:
+                  id: "1231208-id"
+                  mode: reservation
+                  status: quoted_price
+                amount:
+                  value: 128.64
+                  currency: INR
+                durationInMinutes: "15"
+                percentageOfBatteryCharged: "80"
+                energy: 
+                  value: 30
+                  unit: kWh
+                validity:
+                  startDate: "2025-01-27T00:00:00Z"
+                  endDate: "2025-04-27T23:59:59Z"
+                priceComponents:
+                  - type: UNIT
+                    value: 100
+                    currency: INR
+                    description: Base charging session cost (100 INR)
+                  - type: SURCHARGE
+                    value: 20
+                    currency: INR
+                    description: Surge price (20%)
+                  - type: DISCOUNT
+                    value: -15
+                    currency: INR
+                    description: Offer discount (15%)
+                  - type: FEE
+                    value: 10
+                    currency: INR
+                    description: Service fee
+                  - type: FEE
+                    value: 13.64
+                    currency: INR
+                    description: Overcharge estimation
+                  - type: "Pending Payment"
+                    value: 0.64
+                    currency: INR
+                    description: Pending payment
+                cancellation:
+                  fee:
+                    percentage: "30"
+                  externalRef:
+                    mimetype: text/html
+                    url: https://example-company.com/charge/tnc.html
+        "400":
+          description: Bad Request - Invalid request parameters or missing required fields.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "BAD_REQUEST"
+                  message: "Invalid request parameters or missing required fields."
+        "401":
+          description: Unauthorized - Invalid or missing authentication token.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Invalid or missing authentication token."
+        "404":
+          description: Not Found - EVSE or connector not found.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "NOT_FOUND"
+                  message: "EVSE or connector not found."
+        "422":
+          description: Unprocessable Entity - Validation error in request data.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Validation error in request data."
+        "500":
+          description: Internal Server Error - Server error occurred while processing the request.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "Server error occurred while processing the request."
+      description: Get estimates for a prospective charging session and offer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EstimateRequest"
+  /v1/orders/{order_id}/payment:
+    post:
+      operationId: initiatePayment
+      summary: Initiate Payment
+      tags:
+        - Payments
+      parameters:
+        - name: X-Transaction-Id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Bpp-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+              example:
+                order:
+                  id: order-bpp-789012
+                  status: ACTIVE
+                  mode: RESERVATION
+                amount:
+                  value: 128.64
+                  currency: INR
+                beneficiaryId: ""
+                acceptedPaymentMethod:
+                  - BankTransfer
+                  - UPI
+                  - Wallet
+                paymentUrl: ""
+                validity:
+                  startDate: "2025-01-27T00:00:00Z"
+                  endDate: "2025-04-27T23:59:59Z"
+        "400":
+          description: Bad Request - Invalid request parameters or malformed request body.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "BAD_REQUEST"
+                  message: "Invalid request parameters or malformed request body."
+        "401":
+          description: Unauthorized - Invalid or missing authentication token.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Invalid or missing authentication token."
+        "404":
+          description: Not Found - Order not found.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "NOT_FOUND"
+                  message: "Order not found."
+        "409":
+          description: Conflict - Payment already processed or order in invalid state for payment.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "CONFLICT"
+                  message: "Payment already processed or order in invalid state for payment."
+        "422":
+          description: Unprocessable Entity - Validation error in payment data.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Validation error in payment data."
+        "500":
+          description: Internal Server Error - Server error occurred while processing the request.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "Server error occurred while processing the request."
+      description: Initiate or fetch payment instructions for the specified order.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+    parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: string
+          default: <string>
+  /v1/orders/{order_id}:
+    get:
+      summary: get order info
+      tags:
+        - Orders
+      parameters:
+        - name: X-Transaction-Id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Bpp-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                default: <string>
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+              example:
+                order:
+                  id: order-bpp-789012
+                  status: ACTIVE
+                  mode: RESERVATION
+                payment:
+                  status: PAID
+                charging:
+                  status: ACTIVE
+                connectorId: ""
+                connectorType: ""
+                vehicle:
+                  type: ""
+                  model: ""
+                  make: ""
+                trackingUrl: https://track.bluechargenet-aggregator.io/session/SESSION-9876543210
+                chargingTelemetry:
+                  eventTime: "2025-01-27T17:00:00Z"
+                  metrics:
+                    - name: STATE_OF_CHARGE
+                      value: 62.5
+                      unitCode: PERCENTAGE
+                    - name: POWER
+                      value: 18.4
+                      unitCode: KWH
+                    - name: ENERGY
+                      value: 10.2
+                      unitCode: KW
+                    - name: VOLTAGE
+                      value: 392
+                      unitCode: VLT
+                    - name: CURRENT
+                      value: 47
+                      unitCode: AMP
+                    - name: SESSION_DURATION
+                      value: 10
+                      unitCode: min
+        "401":
+          description: Unauthorized - Invalid or missing authentication token.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Invalid or missing authentication token."
+        "404":
+          description: Not Found - Order not found.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "NOT_FOUND"
+                  message: "Order not found."
+        "500":
+          description: Internal Server Error - Server error occurred while processing the request.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "Server error occurred while processing the request."
+      description: >-
+        Retrieve order details, current status, and telemetry for the specified
+        order.
+    parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /v1/orders/{order_id}/cancel:
+    get:
+      operationId: estimateCancel
+      summary: Estimate Cancel
+      tags:
+        - Orders
+      parameters:
+        - name: activity
+          in: query
+          schema:
+            type: string
+        - name: cancel_reason
+          in: query
+          schema:
+            type: string
+        - name: cancel_code
+          in: query
+          schema:
+            type: string
+        - name: X-Transaction-Id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Bpp-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CancelEstimateResponse"
+              example:
+                order:
+                  id: order-bpp-789012
+                  status: ACTIVE
+                  mode: RESERVATION
+                payment:
+                  status: PAID
+                charging:
+                  status: ACTIVE
+                validity:
+                  startDate: "2025-01-27T00:00:00Z"
+                  endDate: "2025-04-27T23:59:59Z"
+                priceComponents:
+                  - type: PAID
+                    value: "400.00"
+                    currency: INR
+                    description: Base price
+                  - type: FEE
+                    value: "30.00"
+                    currency: INR
+                    description: Cancellation charges
+        "400":
+          description: Bad Request - Invalid query parameters.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "BAD_REQUEST"
+                  message: "Invalid query parameters."
+        "401":
+          description: Unauthorized - Invalid or missing authentication token.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Invalid or missing authentication token."
+        "404":
+          description: Not Found - Order not found.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "NOT_FOUND"
+                  message: "Order not found."
+        "500":
+          description: Internal Server Error - Server error occurred while processing the request.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "Server error occurred while processing the request."
+      description: >-
+        Get an estimate of cancellation charges and results for an existing
+        order without performing the cancel.
+    parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: cancelOrder
+      summary: Cancel Order
+      tags:
+        - Orders
+      parameters:
+        - name: X-Transaction-Id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Bpp-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CancelResponse"
+              example:
+                order:
+                  id: order-bpp-789012
+                  status: CANCELLED
+                  mode: RESERVATION
+                payment:
+                  status: PAID
+                charging:
+                  status: ACTIVE
+                priceComponents:
+                  - type: FEE
+                    value: "30.00"
+                    currency: INR
+                    description: Cancellation charges
+                  - type: REFUND
+                    value: "-300.00"
+                    currency: INR
+                    description: Cancellation refund
+        "400":
+          description: Bad Request - Invalid request parameters or malformed request body.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "BAD_REQUEST"
+                  message: "Invalid request parameters or malformed request body."
+        "401":
+          description: Unauthorized - Invalid or missing authentication token.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Invalid or missing authentication token."
+        "404":
+          description: Not Found - Order not found.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "NOT_FOUND"
+                  message: "Order not found."
+        "409":
+          description: Conflict - Order cannot be cancelled in its current state.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "CONFLICT"
+                  message: "Order cannot be cancelled in its current state."
+        "422":
+          description: Unprocessable Entity - Validation error in request data.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Validation error in request data."
+        "500":
+          description: Internal Server Error - Server error occurred while processing the request.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "Server error occurred while processing the request."
+      description: Cancel an existing order.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+  /v1/orders/{order_id}/start:
+    put:
+      operationId: startCharging
+      summary: Start Charging
+      tags:
+        - Orders
+      parameters:
+        - name: X-Transaction-Id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Bpp-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Accepted
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StartChargingResponse"
+              example:
+                order:
+                  id: order-bpp-789012
+                  status: ACTIVE
+                  mode: RESERVATION
+                payment:
+                  status: PAID
+                charging:
+                  status: ACTIVE
+        "400":
+          description: Bad Request - Invalid request parameters or invalid authorization mode.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "BAD_REQUEST"
+                  message: "Invalid request parameters or invalid authorization mode."
+        "401":
+          description: Unauthorized - Invalid or missing authentication token.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Invalid or missing authentication token."
+        "404":
+          description: Not Found - Order not found.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "NOT_FOUND"
+                  message: "Order not found."
+        "409":
+          description: Conflict - Order cannot be started in its current state or charging already in progress.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "CONFLICT"
+                  message: "Order cannot be started in its current state or charging already in progress."
+        "422":
+          description: Unprocessable Entity - Validation error in request data.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Validation error in request data."
+        "500":
+          description: Internal Server Error - Server error occurred while processing the request.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "Server error occurred while processing the request."
+      description: Start a charging session for an existing order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartChargingRequest"
+    parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /v1/orders/{order_id}/stop:
+    get:
+      operationId: estimateStop
+      summary: Estimate Stop
+      tags:
+        - Orders
+      parameters:
+        - name: activity
+          in: query
+          schema:
+            type: string
+        - name: X-Transaction-Id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Bpp-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StopEstimateResponse"
+              example:
+                order:
+                  id: order-bpp-789012
+                  status: ACTIVE
+                  mode: RESERVATION
+                payment:
+                  status: PAID
+                charging:
+                  status: ACTIVE
+                validity:
+                  startDate: "2025-01-27T00:00:00Z"
+                  endDate: "2025-04-27T23:59:59Z"
+                priceComponents:
+                  - type: PAID
+                    value: "400.00"
+                    currency: INR
+                    description: Base price
+                  - type: FEE
+                    value: "30.00"
+                    currency: INR
+                    description: Cancellation charges
+                  - type: REFUND
+                    value: "-300.00"
+                    currency: INR
+                    description: Cancellation refund
+        "400":
+          description: Bad Request - Invalid query parameters.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "BAD_REQUEST"
+                  message: "Invalid query parameters."
+        "401":
+          description: Unauthorized - Invalid or missing authentication token.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Invalid or missing authentication token."
+        "404":
+          description: Not Found - Order not found or no active charging session.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "NOT_FOUND"
+                  message: "Order not found or no active charging session."
+        "500":
+          description: Internal Server Error - Server error occurred while processing the request.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "Server error occurred while processing the request."
+      description: >-
+        Get an estimate of completion summary and charges for stopping a
+        charging session.
+    parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      operationId: stopCharging
+      summary: Stop Charging
+      tags:
+        - Orders
+      parameters:
+        - name: X-Transaction-Id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Bpp-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Completed summary for the stopped charging session.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StopChargingResponse"
+              example:
+                order:
+                  id: order-bpp-789012
+                  status: COMPLETED
+                  mode: RESERVATION
+                payment:
+                  status: PAID
+                charging:
+                  status: COMPLETED
+                validity:
+                  startDate: "2025-01-27T00:00:00Z"
+                  endDate: "2025-04-27T23:59:59Z"
+                priceComponents:
+                  - type: BASE
+                    value: 100
+                    currency: INR
+                    description: Base charging session cost (100 INR)
+                  - type: SURCHARGE
+                    value: 20
+                    currency: INR
+                    description: Surge price (20%)
+                  - type: DISCOUNT
+                    value: -15
+                    currency: INR
+                    description: Offer discount (15%)
+                  - type: FEE
+                    value: 10
+                    currency: INR
+                    description: Service fee
+                  - type: FEE
+                    value: 13.64
+                    currency: INR
+                    description: Overcharge estimation
+                  - type: REFUND
+                    value: "-300.00"
+                    currency: INR
+                    description: Cancellation refund
+        "400":
+          description: Bad Request - Invalid request parameters or malformed request body.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "BAD_REQUEST"
+                  message: "Invalid request parameters or malformed request body."
+        "401":
+          description: Unauthorized - Invalid or missing authentication token.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Invalid or missing authentication token."
+        "404":
+          description: Not Found - Order not found or no active charging session.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "NOT_FOUND"
+                  message: "Order not found or no active charging session."
+        "409":
+          description: Conflict - Charging session cannot be stopped in its current state.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "CONFLICT"
+                  message: "Charging session cannot be stopped in its current state."
+        "422":
+          description: Unprocessable Entity - Validation error in request data.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Validation error in request data."
+        "500":
+          description: Internal Server Error - Server error occurred while processing the request.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "Server error occurred while processing the request."
+      description: Stop an active charging session for the specified order.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StopChargingRequest"
+  /v1/orders/{order_id}/rating:
+    post:
+      operationId: setOrderRating
+      summary: Set Order Rating
+      tags:
+        - Feedback
+      parameters:
+        - name: X-Transaction-Id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Bpp-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Created
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RatingResponse"
+              example:
+                order:
+                  id: order-bpp-789012
+                  status: COMPLETED
+                  mode: RESERVATION
+                feedbackForm:
+                  url: https://example-bpp.com/feedback/portal
+                  mimeType: application/xml
+                  submissionId: feedback-123e4567-e89b-12d3-a456-426614174000
+        "400":
+          description: Invalid rating value or malformed request.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "BAD_REQUEST"
+                  message: "Invalid rating value or malformed request."
+        "401":
+          description: Unauthorized - Invalid or missing authentication token.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Invalid or missing authentication token."
+        "404":
+          description: Order not found.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "NOT_FOUND"
+                  message: "Order not found."
+        "409":
+          description: Conflict - Rating already submitted for this order.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "CONFLICT"
+                  message: "Rating already submitted for this order."
+        "422":
+          description: Unprocessable Entity - Validation error in rating data.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Validation error in rating data."
+        "500":
+          description: Internal Server Error - Server error occurred while processing the request.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "Server error occurred while processing the request."
+      description: Submit a rating and optional feedback for the specified order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RatingRequest"
+    parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /v1/orders/{order_id}/support:
+    get:
+      operationId: getOrderSupport
+      summary: Get Order Support
+      tags:
+        - Support
+      parameters:
+        - name: X-Transaction-Id
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Bpp-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupportResponse"
+              example:
+                order:
+                  id: order-bpp-789012
+                  status: CANCELLED
+                  mode: RESERVATION
+                name: BlueCharge Support Team
+                phone: "18001080"
+                email: support@bluechargenet-aggregator.io
+                url: https://support.bluechargenet-aggregator.io/ticket/SUP-20250730-001
+                hours: Mon–Sun 24/7 IST
+                channels:
+                  - phone
+                  - email
+                  - web
+                  - chat
+        "401":
+          description: Unauthorized - Invalid or missing authentication token.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Invalid or missing authentication token."
+        "404":
+          description: Not Found - Order not found.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "NOT_FOUND"
+                  message: "Order not found."
+        "500":
+          description: Internal Server Error - Server error occurred while processing the request.
+          headers:
+            X-Transaction-Id:
+              required: true
+              schema:
+                type: string
+                description: Transaction identifier for request tracking
+            X-Bpp-Id:
+              required: true
+              schema:
+                type: string
+                description: BPP identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "Server error occurred while processing the request."
+    parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: string
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Error code
+              example: "INVALID_REQUEST"
+            message:
+              type: string
+              description: Human-readable error message
+              example: "Invalid request parameters"
+            details:
+              type: object
+              description: Additional error details
+              additionalProperties: true
+    AvailabilityWindow:
+      type: object
+      description: Time window when the connector is available
+      properties:
+        startTime:
+          type: string
+          format: time
+          description: Start time in HH:mm:ss format
+        endTime:
+          type: string
+          format: time
+          description: End time in HH:mm:ss format
+    Rating:
+      type: object
+      description: User rating information
+      properties:
+        value:
+          type: number
+          format: float
+          description: Average rating value
+        count:
+          type: integer
+          description: Number of ratings
+    Address:
+      type: object
+      description: Address information
+      properties:
+        name:
+          type: string
+          description: Address name/location
+        geo_coordinates:
+          type: array
+          minItems: 2
+          maxItems: 2
+          description: Geographic coordinates as [latitude, longitude] array
+          items:
+            type: number
+          example: [12.9716, 77.5946]
+    ProviderDescriptor:
+      type: object
+      description: Provider descriptor
+      properties:
+        name:
+          type: string
+          description: Provider name
+    Provider:
+      type: object
+      description: Provider information
+      properties:
+        id:
+          type: string
+          description: Provider identifier
+        descriptor:
+          $ref: "#/components/schemas/ProviderDescriptor"
+        address:
+          $ref: "#/components/schemas/Address"
+    ConnectorAttributes:
+      type: object
+      description: Technical attributes of the connector
+      properties:
+        connectorType:
+          type: string
+          enum:
+            - TYPE_1
+            - TYPE_2
+          description: Type of connector
+        maxPowerKW:
+          type: number
+          format: float
+          description: Maximum power in kilowatts
+        minPowerKW:
+          type: number
+          format: float
+          description: Minimum power in kilowatts
+        socketCount:
+          type: integer
+          description: Number of sockets available
+        reservationSupported:
+          type: boolean
+          description: Whether reservations are supported
+        ocppId:
+          type: string
+          description: OCPP identifier
+        evseId:
+          type: string
+          description: EVSE identifier
+        parkingType:
+          type: string
+          description: Type of parking location
+        connectorId:
+          type: string
+          description: Connector identifier
+        powerType:
+          type: string
+          enum:
+            - DC
+            - AC
+          description: Power type
+        connectorFormat:
+          type: string
+          enum:
+            - CABLE
+            - OTHERS
+          description: Connector format
+        chargingSpeed:
+          type: string
+          enum:
+            - SLOW
+            - NORMAL
+            - FAST
+          description: Charging speed category
+        status:
+          type: string
+          enum:
+            - Available
+            - Occupied
+            - Reserved
+            - OutOfOrder
+            - Unknown
+          description: Current status of the connector
+        amenityFeature:
+          type: array
+          description: List of available amenities
+          items:
+            type: string
+        roamingNetwork:
+          type: string
+          description: Roaming network identifier
+    Connector:
+      type: object
+      description: Charging connector information
+      properties:
+        id:
+          type: string
+          description: Unique connector identifier
+        isActive:
+          type: boolean
+          description: Whether the connector is currently active
+        availabilityWindow:
+          type: array
+          description: Time windows when the connector is available
+          items:
+            $ref: "#/components/schemas/AvailabilityWindow"
+        connectorAttributes:
+          $ref: "#/components/schemas/ConnectorAttributes"
+    BuyerFinderFee:
+      type: object
+      description: Finder fee information
+      properties:
+        feeType:
+          type: string
+          description: Type of fee (e.g., PERCENTAGE)
+        feeValue:
+          type: number
+          format: float
+          description: Fee value
+    OfferAttributes:
+      type: object
+      description: Additional offer attributes
+      properties:
+        buyerFinderFee:
+          $ref: "#/components/schemas/BuyerFinderFee"
+        idleFeePolicy:
+          type: string
+          description: Idle fee policy description
+    ApplicableQuantity:
+      type: object
+      description: Quantity unit for pricing
+      properties:
+        unitText:
+          type: string
+          description: Human-readable unit name
+        unitCode:
+          type: string
+          description: Unit code
+        unitQuantity:
+          type: number
+          format: float
+          description: Quantity value
+    Price:
+      type: object
+      description: Pricing information
+      properties:
+        currency:
+          type: string
+          description: Currency code (ISO 4217)
+        value:
+          type: number
+          format: float
+          description: Price value
+        applicableQuantity:
+          $ref: "#/components/schemas/ApplicableQuantity"
+    Validity:
+      type: object
+      description: Offer validity period
+      properties:
+        startDate:
+          type: string
+          format: date-time
+          description: Start date and time
+        endDate:
+          type: string
+          format: date-time
+          description: End date and time
+    OfferDescriptor:
+      type: object
+      description: Offer description
+      properties:
+        name:
+          type: string
+          description: Offer name
+    Offer:
+      type: object
+      description: Pricing offer for connectors
+      properties:
+        id:
+          type: string
+          description: Unique offer identifier
+        descriptor:
+          $ref: "#/components/schemas/OfferDescriptor"
+        items:
+          type: array
+          description: List of connector IDs this offer applies to
+          items:
+            type: string
+        price:
+          $ref: "#/components/schemas/Price"
+        validity:
+          $ref: "#/components/schemas/Validity"
+        acceptedPaymentMethod:
+          type: array
+          description: List of accepted payment methods
+          items:
+            type: string
+        offerAttributes:
+          $ref: "#/components/schemas/OfferAttributes"
+        provider:
+          type: string
+          description: Provider identifier
+    Catalog:
+      type: object
+      description: Catalog containing connectors and offers
+      properties:
+        id:
+          type: string
+          description: Unique catalog identifier
+        provider:
+          $ref: "#/components/schemas/Provider"
+        rating:
+          $ref: "#/components/schemas/Rating"
+        connectors:
+          type: array
+          description: List of charging connectors
+          items:
+            $ref: "#/components/schemas/Connector"
+        offers:
+          type: array
+          description: List of pricing offers for connectors
+          items:
+            $ref: "#/components/schemas/Offer"
+    SearchResponse:
+      type: object
+      required:
+        - total
+        - page
+        - per_page
+        - catalogs
+      properties:
+        total:
+          type: integer
+          description: Total number of catalogs matching the search criteria
+        page:
+          type: integer
+          description: Current page number
+        per_page:
+          type: integer
+          description: Number of items per page
+        catalogs:
+          type: array
+          description: List of catalogs containing connectors and offers
+          items:
+            $ref: "#/components/schemas/Catalog"
+    Vehicle:
+      type: object
+      description: Vehicle information
+      properties:
+        make:
+          type: string
+          description: Vehicle manufacturer
+        model:
+          type: string
+          description: Vehicle model
+        type:
+          type: string
+          enum:
+            - 2-wheeler
+            - 3-wheeler
+            - 4-wheeler
+          description: Vehicle type
+    SearchFilters:
+      type: object
+      description: Search filters
+      properties:
+        cpo:
+          type: string
+          description: Charge Point Operator identifier
+        connector_type:
+          type: string
+          enum:
+            - TYPE_1
+            - TYPE_2
+          description: Type of connector
+        max_power_kw:
+          type: number
+          format: float
+          minimum: 0
+          description: Minimum maximum power in kilowatts (filters connectors with maxPowerKW >= this value)
+        amenities:
+          type: array
+          description: List of required amenities (filters connectors that have all specified amenities)
+          items:
+            type: string
+          example:
+            - Restaurant
+            - Restroom
+            - Wi-Fi
+        vehicle:
+          $ref: "#/components/schemas/Vehicle"
+    SearchSort:
+      type: object
+      description: Sorting criteria
+      properties:
+        sort_by:
+          type: string
+          description: Field to sort by
+        order:
+          type: string
+          enum:
+            - asc
+    TimeWindow:
+      type: object
+      description: Desired time window
+      properties:
+        start:
+          type: string
+          format: date-time
+          description: Start date and time
+        end:
+          type: string
+          format: date-time
+          description: End date and time
+    SearchRequest:
+      type: object
+      properties:
+        evse_id:
+          type: string
+          description: Specific EVSE identifier to look up
+        geo_coordinates:
+          type: array
+          minItems: 2
+          maxItems: 2
+          description: Geographic coordinates as [latitude, longitude] array
+          items:
+            type: number
+          example: [12.9716, 77.5946]
+        distance_meters:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 50000
+          example: 5000
+          description: Radius of search in meters (0-50000)
+        time_window:
+          $ref: "#/components/schemas/TimeWindow"
+        filters:
+          $ref: "#/components/schemas/SearchFilters"
+        sort:
+          $ref: "#/components/schemas/SearchSort"
+      oneOf:
+        - type: object
+          required:
+            - evse_id
+          properties:
+            evse_id:
+              type: string
+              description: Specific EVSE identifier to look up
+            time_window:
+              $ref: "#/components/schemas/TimeWindow"
+            filters:
+              $ref: "#/components/schemas/SearchFilters"
+        - type: object
+          required:
+            - geo_coordinates
+            - distance_meters
+          properties:
+            geo_coordinates:
+              type: array
+              minItems: 2
+              maxItems: 2
+              description: Geographic coordinates as [latitude, longitude] array
+              items:
+                type: number
+              example: [12.9716, 77.5946]
+            distance_meters:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 50000
+              example: 5000
+              description: Radius of search in meters (0-50000)
+            time_window:
+              $ref: "#/components/schemas/TimeWindow"
+            filters:
+              $ref: "#/components/schemas/SearchFilters"
+    Energy:
+      type: object
+      description: Target energy for estimation
+      properties:
+        value:
+          type: number
+        unit:
+          type: string
+          example: kWh
+    Amount:
+      type: object
+      description: Amount for estimation
+      properties:
+        value:
+          type: number
+          format: float
+          minimum: 0
+          description: Amount value
+        currency:
+          type: string
+          description: Currency code (ISO 4217)
+    EstimateRequest:
+      type: object
+      required:
+        - evse_id
+        - vehicle
+        - connector_id
+      properties:
+        evse_id:
+          type: string
+          description: EVSE identifier of the selected connector/station
+        vehicle:
+          $ref: "#/components/schemas/Vehicle"
+        connector_id:
+          type: string
+        time_window:
+          $ref: "#/components/schemas/TimeWindow"
+        energy:
+          $ref: "#/components/schemas/Energy"
+        offer_id:
+          type: string
+        amount:
+          $ref: "#/components/schemas/Amount"
+    OrderInfo:
+      type: object
+      description: Order information
+      properties:
+        id:
+          type: string
+          description: Order identifier
+        mode:
+          type: string
+          description: Order mode (e.g., reservation, RESERVATION)
+        status:
+          type: string
+          description: Order status (e.g., quoted_price, ACTIVE, CANCELLED, COMPLETED)
+    PaymentInfo:
+      type: object
+      description: Payment information
+      properties:
+        status:
+          type: string
+          description: Payment status (e.g., PAID, PAID)
+    ChargingInfo:
+      type: object
+      description: Charging session information
+      properties:
+        status:
+          type: string
+          description: Charging status (e.g., ACTIVE, COMPLETED)
+    CancellationFee:
+      type: object
+      description: Cancellation fee information
+      properties:
+        percentage:
+          type: string
+          description: Cancellation fee percentage
+    ExternalRef:
+      type: object
+      description: External reference for terms and conditions
+      properties:
+        mimetype:
+          type: string
+          description: MIME type of the external reference
+        url:
+          type: string
+          format: uri
+          description: URL to the external reference
+    CancellationPolicy:
+      type: object
+      description: Cancellation policy and fees
+      properties:
+        fee:
+          $ref: "#/components/schemas/CancellationFee"
+        externalRef:
+          $ref: "#/components/schemas/ExternalRef"
+    PriceComponent:
+      type: object
+      description: Price component breakdown
+      properties:
+        type:
+          type: string
+          description: Component type (UNIT, SURCHARGE, DISCOUNT, FEE, etc.)
+        value:
+          type: number
+          format: float
+          description: Component value
+        currency:
+          type: string
+          description: Currency code (ISO 4217)
+        description:
+          type: string
+          description: Human-readable description of the component
+    EstimateResponse:
+      type: object
+      description: Estimate response
+      properties:
+        order:
+          $ref: "#/components/schemas/OrderInfo"
+        amount:
+          $ref: "#/components/schemas/Amount"
+          description: Total estimated amount
+        durationInMinutes:
+          type: string
+          description: Estimated duration in minutes
+        percentageOfBatteryCharged:
+          type: string
+          description: Percentage value (e.g., battery percentage)
+        energy:
+          $ref: "#/components/schemas/Energy"
+          description: Estimated energy in kWh
+        validity:
+          $ref: "#/components/schemas/Validity"
+        priceComponents:
+          type: array
+          description: Breakdown of price components
+          items:
+            $ref: "#/components/schemas/PriceComponent"
+        cancellation:
+          $ref: "#/components/schemas/CancellationPolicy"
+    ChargingMetric:
+      type: object
+      description: Charging telemetry metric
+      properties:
+        name:
+          type: string
+          description: Metric name (e.g., STATE_OF_CHARGE, POWER, ENERGY, VOLTAGE, CURRENT, SESSION_DURATION)
+        value:
+          type: number
+          format: float
+          description: Metric value
+        unitCode:
+          type: string
+          description: Unit code for the metric (e.g., PERCENTAGE, KWH, KW, VLT, AMP, min)
+    ChargingTelemetry:
+      type: object
+      description: Real-time charging telemetry data
+      properties:
+        eventTime:
+          type: string
+          format: date-time
+          description: Timestamp of the telemetry event
+        metrics:
+          type: array
+          description: Array of charging metrics
+          items:
+            $ref: "#/components/schemas/ChargingMetric"
+    OrderResponse:
+      type: object
+      description: Order response with details
+      properties:
+        order:
+          $ref: "#/components/schemas/OrderInfo"
+        payment:
+          $ref: "#/components/schemas/PaymentInfo"
+        charging:
+          $ref: "#/components/schemas/ChargingInfo"
+        connectorId:
+          type: string
+          description: Connector identifier
+        connectorType:
+          type: string
+          description: Type of connector
+        vehicle:
+          $ref: "#/components/schemas/Vehicle"
+        trackingUrl:
+          type: string
+          format: uri
+          description: URL to track the charging session
+        chargingTelemetry:
+          $ref: "#/components/schemas/ChargingTelemetry"
+    PriceComponentString:
+      type: object
+      description: Price component with string value
+      properties:
+        type:
+          type: string
+          description: Component type (e.g., PAID, FEE, REFUND)
+        value:
+          type: string
+          description: Component value as string
+        currency:
+          type: string
+          description: Currency code (ISO 4217)
+        description:
+          type: string
+          description: Human-readable description of the component
+    PriceComponentFlexible:
+      type: object
+      description: Price component with flexible value type
+      properties:
+        type:
+          type: string
+          description: Component type (e.g., BASE, SURCHARGE, DISCOUNT, FEE, REFUND)
+        value:
+          oneOf:
+            - type: number
+              format: float
+            - type: string
+          description: Component value (can be number or string, negative for discounts/refunds)
+        currency:
+          type: string
+          description: Currency code (ISO 4217)
+        description:
+          type: string
+          description: Human-readable description of the component
+    CancelEstimateResponse:
+      type: object
+      description: Cancellation estimate response
+      properties:
+        order:
+          $ref: "#/components/schemas/OrderInfo"
+        payment:
+          $ref: "#/components/schemas/PaymentInfo"
+        charging:
+          $ref: "#/components/schemas/ChargingInfo"
+        validity:
+          $ref: "#/components/schemas/Validity"
+        priceComponents:
+          type: array
+          description: Breakdown of price components for cancellation
+          items:
+            $ref: "#/components/schemas/PriceComponentString"
+    CancelResponse:
+      type: object
+      description: Cancel order response
+      properties:
+        order:
+          $ref: "#/components/schemas/OrderInfo"
+        payment:
+          $ref: "#/components/schemas/PaymentInfo"
+        charging:
+          $ref: "#/components/schemas/ChargingInfo"
+        priceComponents:
+          type: array
+          description: Breakdown of price components for cancellation
+          items:
+            $ref: "#/components/schemas/PriceComponentString"
+    StartChargingRequest:
+      type: object
+      description: Start charging request
+    StartChargingResponse:
+      type: object
+      description: Start charging response
+      properties:
+        order:
+          $ref: "#/components/schemas/OrderInfo"
+        payment:
+          $ref: "#/components/schemas/PaymentInfo"
+        charging:
+          $ref: "#/components/schemas/ChargingInfo"
+    StopEstimateResponse:
+      type: object
+      description: Stop estimate response
+      properties:
+        order:
+          $ref: "#/components/schemas/OrderInfo"
+        payment:
+          $ref: "#/components/schemas/PaymentInfo"
+        charging:
+          $ref: "#/components/schemas/ChargingInfo"
+        validity:
+          $ref: "#/components/schemas/Validity"
+        priceComponents:
+          type: array
+          description: Breakdown of price components for stopping the session
+          items:
+            $ref: "#/components/schemas/PriceComponentString"
+    StopChargingRequest:
+      type: object
+      description: Stop charging request
+      properties:
+        reasonCode:
+          type: string
+          description: Optional code indicating reason for stopping
+        message:
+          type: string
+          description: Optional free-form message
+    StopChargingResponse:
+      type: object
+      description: Stop charging response
+      properties:
+        order:
+          $ref: "#/components/schemas/OrderInfo"
+        payment:
+          $ref: "#/components/schemas/PaymentInfo"
+        charging:
+          $ref: "#/components/schemas/ChargingInfo"
+        validity:
+          $ref: "#/components/schemas/Validity"
+        priceComponents:
+          type: array
+          description: Breakdown of price components for the completed session
+          items:
+            $ref: "#/components/schemas/PriceComponentFlexible"
+    Feedback:
+      type: object
+      description: Feedback information
+      properties:
+        comments:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    RatingRequest:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Rating score between 1 and 5
+        feedback:
+          $ref: "#/components/schemas/Feedback"
+    FeedbackForm:
+      type: object
+      description: Feedback form information
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL to the feedback form
+        mimeType:
+          type: string
+          description: MIME type of the feedback form
+        submissionId:
+          type: string
+          description: Unique submission identifier for the feedback
+    RatingResponse:
+      type: object
+      description: Rating response
+      properties:
+        order:
+          $ref: "#/components/schemas/OrderInfo"
+        feedbackForm:
+          $ref: "#/components/schemas/FeedbackForm"
+    SupportResponse:
+      type: object
+      description: Support response
+      properties:
+        order:
+          $ref: "#/components/schemas/OrderInfo"
+        name:
+          type: string
+          description: Support team name
+        phone:
+          type: string
+          description: Support phone number
+        email:
+          type: string
+          format: email
+          description: Support email address
+        url:
+          type: string
+          format: uri
+          description: URL to support portal or ticket
+        hours:
+          type: string
+          description: Support hours of operation
+        channels:
+          type: array
+          description: Available support channels
+          items:
+            type: string
+            description: Support channel (e.g., phone, email, web, chat)
+    PaymentResponse:
+      type: object
+      description: Payment response
+      properties:
+        order:
+          $ref: "#/components/schemas/OrderInfo"
+        amount:
+          $ref: "#/components/schemas/Amount"
+          description: Total payment amount
+        beneficiaryId:
+          type: string
+          description: Beneficiary identifier
+        acceptedPaymentMethod:
+          type: array
+          description: List of accepted payment methods
+          items:
+            type: string
+        paymentUrl:
+          type: string
+          format: uri
+          description: URL for payment gateway (if applicable)
+        validity:
+          $ref: "#/components/schemas/Validity"
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - BearerAuth: []
+tags:
+  - name: Discovery
+    description: Searching and getting estimates for evCharging.
+  - name: Payments
+    description: Initiate the payment and confirmation.
+  - name: Orders
+    description: Check order and charging status after payment is done.
+  - name: Feedback
+    description: Give feedback to the order once completed.
+  - name: Support
+    description: Get support for any order.
