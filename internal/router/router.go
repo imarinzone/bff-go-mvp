@@ -8,7 +8,6 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 
-	"bff-go-mvp/internal/api"
 	"bff-go-mvp/internal/config"
 	"bff-go-mvp/internal/domain/estimate"
 	"bff-go-mvp/internal/domain/feedback"
@@ -44,7 +43,6 @@ func New(cfg *config.Config, logger *zap.Logger) *mux.Router {
 	ordersLifecycleHandler := handler.NewOrdersLifecycleHandler(lifecycleService, logger)
 	feedbackHandler := handler.NewFeedbackHandler(feedbackService, logger)
 	supportHandler := handler.NewSupportHandler(supportService, logger)
-	discoveryHandler := api.NewDiscoveryHandler(cfg.GRPC.ServiceAddress, logger)
 
 	// Routes from swagger.yaml
 	r.HandleFunc("/v1/search", searchHandler.SearchChargingConnectors).Methods(http.MethodPost)
@@ -58,9 +56,6 @@ func New(cfg *config.Config, logger *zap.Logger) *mux.Router {
 	r.HandleFunc("/v1/orders/{order_id}/start", ordersLifecycleHandler.StartCharging).Methods(http.MethodPut)
 	r.HandleFunc("/v1/orders/{order_id}/rating", feedbackHandler.SetOrderRating).Methods(http.MethodPost)
 	r.HandleFunc("/v1/orders/{order_id}/support", supportHandler.GetOrderSupport).Methods(http.MethodGet)
-
-	// Existing discovery route (legacy)
-	r.HandleFunc("/discovery", discoveryHandler.HandleDiscovery).Methods(http.MethodPost)
 
 	// Health
 	r.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {

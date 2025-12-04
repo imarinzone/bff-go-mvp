@@ -46,4 +46,5 @@ dist/
 # Keep .env.example in version control
 !.env.example
 
+/tmp/
 

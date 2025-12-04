@@ -1,0 +1,33 @@
+# Air configuration file for bff-go-mvp
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/api ./cmd/api"
+  bin = "./tmp/api"
+  full_bin = ""
+  include_ext = ["go"]
+  exclude_dir = ["tmp", "bin", "proto/discovery/gen", "internal/docs"]
+  exclude_file = []
+  exclude_regex = []
+  include_dir = ["cmd", "internal"]
+  kill_delay = 500
+  delay = 1000
+  stop_on_error = true
+  send_interrupt = false
+  log = "build-errors.log"
+
+[log]
+  time = true
+
+[color]
+  main = "yellow"
+  watcher = "cyan"
+  build = "green"
+  runner = "magenta"
+
+[misc]
+  clean_on_exit = true
+
+

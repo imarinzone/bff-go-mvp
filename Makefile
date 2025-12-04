@@ -1,20 +1,19 @@
-.PHONY: build run-api run-worker test clean generate swagger swagger-clean docker-build docker-up docker-down docker-logs docker-clean env
+.PHONY: build run-api run-api-dev test clean generate swagger swagger-clean docker-build docker-up docker-down docker-logs docker-clean env
 
 # Build all binaries
 build:
 	@echo "Building..."
 	@go build -o bin/api cmd/api/main.go
-	@go build -o bin/worker cmd/worker/main.go
 
 # Run API server
 run-api:
 	@echo "Starting API server..."
 	@go run cmd/api/main.go
 
-# Run Temporal worker
-run-worker:
-	@echo "Starting Temporal worker..."
-	@go run cmd/worker/main.go
+# Run API server in dev mode with auto-reload (requires air: go install github.com/air-verse/air@latest)
+run-api-dev:
+	@echo "Starting API server with air (auto-reload)..."
+	@air -c .air.toml
 
 # Run tests
 test:
@@ -68,7 +67,6 @@ env:
 docker-build:
 	@echo "Building Docker images..."
 	@docker build -f Dockerfile.api -t bff-api:latest .
-	@docker build -f Dockerfile.worker -t bff-worker:latest .
 
 docker-up:
 	@echo "Starting Docker Compose services..."
@@ -84,6 +82,6 @@ docker-logs:
 docker-clean:
 	@echo "Cleaning Docker resources..."
 	@docker-compose down -v
-	@docker rmi bff-api:latest bff-worker:latest 2>/dev/null || true
+	@docker rmi bff-api:latest 2>/dev/null || true
 
 
