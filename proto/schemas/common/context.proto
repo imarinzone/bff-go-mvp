@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "bff-go-mvp/proto/common/gen;common";
+
+// Context message for beckn protocol
+message Context {
+  string action = 2;
+  string domain = 3;
+  Location location = 4;
+  string bap_id = 5;
+  string bap_uri = 6;
+  string bpp_id = 7;
+  string bpp_uri = 8;
+  string transaction_id = 9;
+  string message_id = 10;
+  string timestamp = 11;
+  string ttl = 12;
+}
+
+// Location message
+message Location {
+  Country country = 1;
+  City city = 2;
+}
+
+// Country message
+message Country {
+  string code = 1;
+}
+
+// City message
+message City {
+  string code = 1;
+}
+
