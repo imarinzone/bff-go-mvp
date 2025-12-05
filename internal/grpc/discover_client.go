@@ -62,4 +62,3 @@ func (c *DiscoverClient) Close() error {
 	}
 	return nil
 }
-
