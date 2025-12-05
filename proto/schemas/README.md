@@ -8,8 +8,8 @@ This directory contains all protobuf schema definitions that can be shared with 
 schemas/
 ├── common/
 │   └── context.proto      # Common context messages (beckn protocol)
-└── search/
-    └── search.proto       # Search service definitions
+└── discover/
+    └── discover.proto     # Discover service definitions
 ```
 
 ## Usage for Downstream Services
@@ -28,7 +28,7 @@ protoc --proto_path=schemas \
   --go-grpc_out=./gen \
   --go-grpc_opt=paths=source_relative \
   schemas/common/context.proto \
-  schemas/search/search.proto
+  schemas/discover/discover.proto
 ```
 
 3. **Import in your proto files**:
@@ -51,14 +51,14 @@ When using these schemas, always set `--proto_path=schemas` (or the path where y
 ```go
 import (
     "bff-go-mvp/proto/common/gen" // or your import path
-    "bff-go-mvp/proto/search/gen"
+    "bff-go-mvp/proto/discover/gen"
 )
 
 // Use the generated types
-req := &search.SearchRequest{
+req := &discover.DiscoverRequest{
     Context: &common.Context{
         Version: "1.0.0",
-        Action:  "search",
+        Action:  "discover",
         // ...
     },
     // ...

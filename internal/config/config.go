@@ -12,7 +12,7 @@ type Config struct {
 
 // GRPCConfig holds gRPC client configuration
 type GRPCConfig struct {
-	ServiceAddress string
+	DiscoverServiceAddress string
 }
 
 // APIConfig holds API server configuration
@@ -24,7 +24,7 @@ type APIConfig struct {
 func Load() *Config {
 	return &Config{
 		GRPC: GRPCConfig{
-			ServiceAddress: getEnv("GRPC_SERVICE_ADDRESS", "localhost:50051"),
+			DiscoverServiceAddress: getEnv("DISCOVER_SERVICE_ADDRESS", "localhost:8081"),
 		},
 		API: APIConfig{
 			Port: getEnv("API_PORT", "8000"),
