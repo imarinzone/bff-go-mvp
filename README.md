@@ -184,7 +184,7 @@ docker build -f Dockerfile.api -t bff-api:latest .
 Run the API container:
 ```bash
 docker run -p 8000:8000 \
-  -e DISCOVER_SERVICE_ADDRESS=localhost:8081 \
+  -e GRPC_SERVICE_ADDRESS=localhost:50051 \
   -e API_PORT=8000 \
   bff-api:latest
 ```
@@ -242,7 +242,7 @@ Configuration can be set via environment variables. The recommended approach is 
 ### Environment Variables
 
 - `ENV`: Environment mode - "development" or "dev" for dev logger, otherwise production (default: production)
-- `DISCOVER_SERVICE_ADDRESS`: Discover service gRPC address (default: localhost:8081)
+- `GRPC_SERVICE_ADDRESS`: gRPC service address (default: localhost:50051)
 - `API_PORT`: API server port (default: 8000)
 
 ### Using .env File
