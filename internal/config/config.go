@@ -6,8 +6,8 @@ import (
 
 // Config holds application configuration
 type Config struct {
-	GRPC    GRPCConfig
-	API     APIConfig
+	GRPC GRPCConfig
+	API  APIConfig
 }
 
 // GRPCConfig holds gRPC client configuration
@@ -27,7 +27,7 @@ func Load() *Config {
 			ServiceAddress: getEnv("GRPC_SERVICE_ADDRESS", "localhost:50051"),
 		},
 		API: APIConfig{
-			Port: getEnv("API_PORT", "8080"),
+			Port: getEnv("API_PORT", "8000"),
 		},
 	}
 }
