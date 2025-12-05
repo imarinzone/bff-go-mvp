@@ -40,7 +40,7 @@ WORKDIR /root/
 COPY --from=builder /app/bin/api .
 
 # Expose port
-EXPOSE 8080
+EXPOSE 8000
 
 # Run the API server
 CMD ["./api"]

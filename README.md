@@ -172,7 +172,7 @@ make run-api
 go run cmd/api/main.go
 ```
 
-The API server will start on `http://localhost:8080`
+The API server will start on `http://localhost:8000`
 
 ### Docker Commands
 
@@ -183,9 +183,9 @@ docker build -f Dockerfile.api -t bff-api:latest .
 
 Run the API container:
 ```bash
-docker run -p 8080:8080 \
+docker run -p 8000:8000 \
   -e GRPC_SERVICE_ADDRESS=localhost:50051 \
-  -e API_PORT=8080 \
+  -e API_PORT=8000 \
   bff-api:latest
 ```
 
@@ -243,7 +243,7 @@ Configuration can be set via environment variables. The recommended approach is 
 
 - `ENV`: Environment mode - "development" or "dev" for dev logger, otherwise production (default: production)
 - `GRPC_SERVICE_ADDRESS`: gRPC service address (default: localhost:50051)
-- `API_PORT`: API server port (default: 8080)
+- `API_PORT`: API server port (default: 8000)
 
 ### Using .env File
 

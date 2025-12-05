@@ -31,8 +31,8 @@ func TestLoad(t *testing.T) {
 	if cfg.GRPC.ServiceAddress != "localhost:50051" {
 		t.Errorf("Expected default gRPC address 'localhost:50051', got '%s'", cfg.GRPC.ServiceAddress)
 	}
-	if cfg.API.Port != "8080" {
-		t.Errorf("Expected default API port '8080', got '%s'", cfg.API.Port)
+	if cfg.API.Port != "8000" {
+		t.Errorf("Expected default API port '8000', got '%s'", cfg.API.Port)
 	}
 
 	// Test with environment variables
