@@ -9,7 +9,6 @@ import (
 
 	"bff-go-mvp/internal/grpc"
 	"bff-go-mvp/internal/model"
-	commonpb "bff-go-mvp/proto/common/gen/common"
 	discoverpb "bff-go-mvp/proto/discover/gen/discover"
 )
 
@@ -51,7 +50,8 @@ func (s *GRPCService) modelToProtoRequest(req model.SearchRequest) *discoverpb.D
 	timestamp := time.Now().UTC().Format(time.RFC3339)
 
 	// Build context
-	context := &commonpb.Context{
+	context := &discoverpb.Context{
+		Version:       VersionDefault,
 		Action:        ActionDiscover,
 		Domain:        DomainDefault,
 		BapId:         BapIDDefault,
@@ -60,7 +60,6 @@ func (s *GRPCService) modelToProtoRequest(req model.SearchRequest) *discoverpb.D
 		MessageId:     messageID,
 		Timestamp:     timestamp,
 		Ttl:           TTLDefault,
-		// bpp_id and bpp_uri left empty as they're not known at request time
 	}
 
 	// Build message
