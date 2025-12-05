@@ -15,6 +15,7 @@ import (
 	"bff-go-mvp/internal/domain/payment"
 	"bff-go-mvp/internal/domain/search"
 	"bff-go-mvp/internal/domain/support"
+	"bff-go-mvp/internal/grpc"
 	"bff-go-mvp/internal/handler"
 )
 
@@ -71,11 +72,15 @@ func New(cfg *config.Config, logger *zap.Logger) *mux.Router {
 }
 
 func chooseSearchService(cfg *config.Config, logger *zap.Logger) search.Service {
-	// For now we only support the mock service. Later we can switch on cfg.Backend.Mode
-	// to return a gRPC-backed implementation.
-	_ = logger
-	_ = cfg
-	return search.NewMockService()
+	// Create gRPC client for discover service
+	grpcClient, err := grpc.NewDiscoverClient(cfg.GRPC.DiscoverServiceAddress)
+	if err != nil {
+		logger.Error("Failed to create gRPC discover client, falling back to mock", zap.Error(err))
+		return search.NewMockService()
+	}
+
+	// Create gRPC service
+	return search.NewGRPCService(grpcClient, logger)
 }
 
 func chooseEstimateService(cfg *config.Config, logger *zap.Logger) estimate.Service {

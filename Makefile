@@ -23,17 +23,18 @@ test:
 # Generate protobuf code
 generate:
 	@echo "Generating protobuf code..."
-	@mkdir -p proto/common/gen proto/search/gen
+	@mkdir -p proto/discover/gen
 	@PATH=$$(go env GOPATH)/bin:$$PATH protoc --proto_path=proto/schemas \
-		--go_out=proto/common/gen \
+		--go_out=proto/discover/gen \
 		--go_opt=paths=source_relative \
-		proto/schemas/common/context.proto
+		proto/schemas/discover/discover.proto \
+		proto/schemas/discover/on_discover.proto
 	@PATH=$$(go env GOPATH)/bin:$$PATH protoc --proto_path=proto/schemas \
-		--go_out=proto/search/gen \
+		--go_out=proto/discover/gen \
 		--go_opt=paths=source_relative \
-		--go-grpc_out=proto/search/gen \
+		--go-grpc_out=proto/discover/gen \
 		--go-grpc_opt=paths=source_relative \
-		proto/schemas/search/search.proto
+		proto/schemas/discover/discover_service.proto
 
 # Generate Swagger docs using swaggo
 swagger:
@@ -49,7 +50,7 @@ swagger-clean:
 clean:
 	@echo "Cleaning..."
 	@rm -rf bin/
-	@rm -rf proto/common/gen proto/search/gen
+	@rm -rf proto/discover/gen
 
 # Install dependencies
 deps:

@@ -1,42 +1,33 @@
 syntax = "proto3";
 
-package search;
+package discover;
 
-import "common/context.proto";
+option go_package = "bff-go-mvp/proto/discover/gen;discover";
 
-option go_package = "bff-go-mvp/proto/search/gen;search";
-
-// Search service definition
-service SearchService {
-  rpc Search(SearchRequest) returns (SearchResponse);
+// OnDiscover response matching the beckn protocol structure
+message OnDiscoverResponse {
+  OnDiscoverContext context = 1;
+  OnDiscoverMessageResponse message = 2;
 }
 
-// Search request matching the beckn protocol structure
-message SearchRequest {
-  common.Context context = 1;
-  Message message = 2;
+// Context message for on_discover response
+// Contains both BAP (Buyer App) and BPP (Buyer Provider Platform) information
+message OnDiscoverContext {
+  string version = 1;
+  string action = 2;
+  string domain = 3;
+  string bap_id = 4;
+  string bap_uri = 5;
+  string bpp_id = 6;
+  string bpp_uri = 7;
+  string transaction_id = 8;
+  string message_id = 9;
+  string timestamp = 10;
+  string ttl = 11;
 }
 
-// Message containing search parameters
-message Message {
-    Geometry geometry = 1;
-    double distance_meters = 2;
-}
-
-// Geometry for spatial queries
-message Geometry {
-  string type = 1;
-  repeated double coordinates = 2;
-}
-
-// Search response matching the beckn protocol structure
-message SearchResponse {
-  common.Context context = 1;
-  SearchMessageResponse message = 2;
-}
-
-// Message containing search response data
-message SearchMessageResponse {
+// Message containing on_discover response data
+message OnDiscoverMessageResponse {
   repeated Catalog catalogs = 1;
 }
 
@@ -179,4 +170,3 @@ message BuyerFinderFee {
   string fee_type = 1;
   double fee_value = 2;
 }
-

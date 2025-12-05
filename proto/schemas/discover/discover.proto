@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package discover;
+
+option go_package = "bff-go-mvp/proto/discover/gen;discover";
+
+// Discover request matching the beckn protocol structure
+message DiscoverRequest {
+  Context context = 1;
+  Message message = 2;
+}
+
+// Context message for discover request
+// Contains BAP (Buyer App) information only, as BPP is not known at request time
+message Context {
+  string version = 1;
+  string action = 2;
+  string domain = 3;
+  string bap_id = 4;
+  string bap_uri = 5;
+  string transaction_id = 6;
+  string message_id = 7;
+  string timestamp = 8;
+  string ttl = 9;
+}
+
+// Message containing discover parameters
+message Message {
+  Geometry geometry = 1;
+  double distance_meters = 2;
+}
+
+// Geometry for spatial queries
+message Geometry {
+  string type = 1;
+  repeated double coordinates = 2;
+}
