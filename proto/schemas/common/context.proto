@@ -19,19 +19,3 @@ message Context {
   string ttl = 12;
 }
 
-// Location message
-message Location {
-  Country country = 1;
-  City city = 2;
-}
-
-// Country message
-message Country {
-  string code = 1;
-}
-
-// City message
-message City {
-  string code = 1;
-}
-
