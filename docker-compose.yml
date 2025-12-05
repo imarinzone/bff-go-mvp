@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     environment:
       - ENV=production
-      - GRPC_SERVICE_ADDRESS=localhost:50051
+      - DISCOVER_SERVICE_ADDRESS=localhost:8081
       - API_PORT=8000
     networks:
       - bff-network
