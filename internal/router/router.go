@@ -79,8 +79,11 @@ func chooseSearchService(cfg *config.Config, logger *zap.Logger) search.Service 
 		return search.NewMockService()
 	}
 
-	// Create gRPC service
-	return search.NewGRPCService(grpcClient, logger)
+	// Create gRPC service with fallback to mock on errors
+	grpcService := search.NewGRPCService(grpcClient, logger)
+	mockService := search.NewMockService()
+	// Wrap with fallback: if gRPC fails, use mock service
+	return search.NewFallbackService(grpcService, mockService, logger)
 }
 
 func chooseEstimateService(cfg *config.Config, logger *zap.Logger) estimate.Service {

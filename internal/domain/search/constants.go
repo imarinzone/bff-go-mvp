@@ -2,6 +2,8 @@ package search
 
 // Constants for proto request values
 const (
+	// VersionDefault is the default version value
+	VersionDefault = "1.0.0"
 	// ActionDiscover is the action value for search requests
 	ActionDiscover = "discover"
 
@@ -20,4 +22,3 @@ const (
 	// GeometryTypePoint is the geometry type for spatial queries
 	GeometryTypePoint = "Point"
 )
-
