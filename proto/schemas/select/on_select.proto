@@ -1,0 +1,166 @@
+syntax = "proto3";
+
+package select_;
+
+import "select/select.proto";
+
+option go_package = "bff-go-mvp/proto/select/gen;select_";
+
+// OnSelect response matching the beckn protocol structure
+message OnSelectResponse {
+  OnSelectContext context = 1;
+  OnSelectMessageResponse message = 2;
+}
+
+// Context message for on_select response
+// Contains both BAP (Buyer App) and BPP (Buyer Provider Platform) information
+message OnSelectContext {
+  string version = 1;
+  string action = 2;
+  string domain = 3;
+  string timestamp = 4;
+  string message_id = 5;
+  string transaction_id = 6;
+  string bpp_id = 7;
+  string bpp_uri = 8;
+  string ttl = 9;
+  string bap_id = 10;
+  string bap_uri = 11;
+}
+
+// Message containing on_select response data
+message OnSelectMessageResponse {
+  Order order = 1;
+}
+
+// Order information
+message Order {
+  string context = 1; // @context JSON-LD field
+  string type = 2; // @type JSON-LD field
+  string id = 3; // beckn:id
+  string order_status = 4; // beckn:orderStatus
+  string order_number = 5; // beckn:orderNumber
+  string seller = 6; // beckn:seller
+  string buyer = 7; // beckn:buyer
+  repeated OrderItem order_items = 8; // beckn:orderItems
+  OrderValue order_value = 9; // beckn:orderValue
+  Payment payment = 10; // beckn:payment
+  Fulfillment fulfillment = 11; // beckn:fulfillment
+}
+
+// Order item
+message OrderItem {
+  string line_id = 1; // beckn:lineId
+  string ordered_item = 2; // beckn:orderedItem
+  double quantity = 3; // beckn:quantity
+  AcceptedOffer accepted_offer = 4; // beckn:acceptedOffer
+  Price price = 5; // beckn:price
+}
+
+// Accepted offer
+message AcceptedOffer {
+  string context = 1; // @context JSON-LD field
+  string type = 2; // @type JSON-LD field
+  string id = 3; // beckn:id
+  Descriptor descriptor = 4; // beckn:descriptor
+  repeated string items = 5; // beckn:items
+  Price price = 6; // beckn:price
+  Validity validity = 7; // beckn:validity
+  repeated string accepted_payment_method = 8; // beckn:acceptedPaymentMethod
+  OfferAttributes offer_attributes = 9; // beckn:offerAttributes
+}
+
+// Descriptor
+message Descriptor {
+  string type = 1; // @type JSON-LD field
+  string name = 2; // schema:name
+}
+
+// Price with applicable quantity
+message Price {
+  string currency = 1;
+  double value = 2;
+  ApplicableQuantity applicable_quantity = 3;
+}
+
+// Applicable quantity
+message ApplicableQuantity {
+  string unit_text = 1;
+  string unit_code = 2;
+  int32 unit_quantity = 3;
+}
+
+// Validity period
+message Validity {
+  string type = 1; // @type JSON-LD field
+  string start_date = 2; // schema:startDate
+  string end_date = 3; // schema:endDate
+}
+
+// Offer attributes
+message OfferAttributes {
+  string context = 1; // @context JSON-LD field
+  string type = 2; // @type JSON-LD field
+  BuyerFinderFee buyer_finder_fee = 3;
+  string idle_fee_policy = 4;
+}
+
+// Buyer finder fee
+message BuyerFinderFee {
+  string fee_type = 1;
+  double fee_value = 2;
+}
+
+// Order value with components
+message OrderValue {
+  string currency = 1;
+  double value = 2;
+  repeated PriceComponent components = 3;
+}
+
+// Price component
+message PriceComponent {
+  string type = 1;
+  double value = 2;
+  string currency = 3;
+  string description = 4;
+}
+
+// Payment information
+message Payment {
+  string context = 1; // @context JSON-LD field
+  string type = 2; // @type JSON-LD field
+  string id = 3; // beckn:id
+  string status = 4; // beckn:status
+  Amount amount = 5; // beckn:amount
+  string payment_url = 6; // beckn:paymentURL
+  string txn_ref = 7; // beckn:txnRef
+  string beneficiary = 8; // beckn:beneficiary
+  repeated string accepted_payment_method = 9; // beckn:acceptedPaymentMethod
+}
+
+// Fulfillment information
+message Fulfillment {
+  string context = 1; // @context JSON-LD field
+  string type = 2; // @type JSON-LD field
+  string id = 3; // beckn:id
+  string mode = 4; // beckn:mode
+  string status = 5; // beckn:status
+  DeliveryAttributes delivery_attributes = 6; // beckn:deliveryAttributes
+}
+
+// Delivery attributes (ChargingSession)
+message DeliveryAttributes {
+  string context = 1; // @context JSON-LD field
+  string type = 2; // @type JSON-LD field
+  string session_status = 3;
+  string authorization_mode = 4;
+  string authorization_otp_hint = 5;
+  string connector_type = 6;
+  double max_power_kw = 7;
+  string reservation_id = 8;
+  int32 grace_period_minutes = 9;
+  string tracking_id = 10;
+  string tracking_url = 11;
+  string tracking_status = 12;
+}
