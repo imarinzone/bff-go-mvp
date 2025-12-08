@@ -31,6 +31,12 @@ func (s *GRPCService) Estimate(ctx context.Context, req model.EstimateRequest) (
 	// Convert model request to proto request
 	protoReq := s.modelToProtoRequest(req)
 
+	// Log the gRPC request
+	s.logger.Info("Sending gRPC select request to downstream",
+		zap.String("service", "select"),
+		zap.String("request", protoReq.String()),
+	)
+
 	// Call gRPC service
 	protoResp, err := s.client.Select(ctx, protoReq)
 	if err != nil {
@@ -187,4 +193,3 @@ func (s *GRPCService) getFulfillmentMode(order *selectpb.Order) string {
 	}
 	return ""
 }
-

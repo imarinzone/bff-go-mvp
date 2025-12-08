@@ -8,13 +8,13 @@ const (
 	ActionDiscover = "discover"
 
 	// DomainDefault is the default domain
-	DomainDefault = "bhim.com"
+	DomainDefault = "http://sandbox-bap.ubc.nbsl.org.in/"
 
 	// BapIDDefault is the default BAP ID
-	BapIDDefault = "1"
+	BapIDDefault = "76EU7wMRqrRgfU63LtWXavqTRoRUpdZ3944ErxFttTsZpqHxSW7XW4"
 
 	// BapURIDefault is the default BAP URI
-	BapURIDefault = "bhim.com"
+	BapURIDefault = "http://sandbox-bap.ubc.nbsl.org.in/"
 
 	// TTLDefault is the default TTL value
 	TTLDefault = "PT30S"
