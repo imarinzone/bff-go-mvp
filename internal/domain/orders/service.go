@@ -10,5 +10,3 @@ import (
 type Service interface {
 	GetOrder(ctx context.Context, orderID string) (model.OrderResponse, error)
 }
-
-

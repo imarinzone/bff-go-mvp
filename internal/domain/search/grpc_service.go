@@ -39,6 +39,12 @@ func (s *GRPCService) Search(ctx context.Context, page, perPage int, req model.S
 	// Convert model request to proto request
 	protoReq := s.modelToProtoRequest(req, discoverContext)
 
+	// Log the gRPC request
+	s.logger.Info("Sending gRPC discover request to downstream",
+		zap.String("service", "discover"),
+		zap.String("request", protoReq.String()),
+	)
+
 	// Call gRPC service
 	protoResp, err := s.client.Discover(ctx, protoReq)
 	if err != nil {
@@ -119,6 +125,52 @@ func (s *GRPCService) modelToProtoRequest(req model.SearchRequest, discoverConte
 			Coordinates: req.GeoCoordinates,
 		}
 		message.DistanceMeters = req.DistanceMeters
+	}
+
+	// Set evse_id if provided
+	if req.EvseID != "" {
+		message.EvseId = req.EvseID
+	}
+
+	// Convert time_window if provided
+	if req.TimeWindow != nil {
+		message.TimeWindow = &discoverpb.TimeWindow{
+			Start: req.TimeWindow.Start,
+			End:   req.TimeWindow.End,
+		}
+	}
+
+	// Convert filters if provided
+	if req.Filters != nil {
+		filters := &discoverpb.Filters{
+			Cpo:           req.Filters.CPO,
+			ConnectorType: req.Filters.ConnectorType,
+			Amenities:     req.Filters.Amenities,
+		}
+
+		// Handle MaxPowerKW
+		if req.Filters.MaxPowerKW != nil {
+			filters.MaxPowerKw = *req.Filters.MaxPowerKW
+		}
+
+		// Convert vehicle if provided
+		if req.Filters.Vehicle != nil {
+			filters.Vehicle = &discoverpb.Vehicle{
+				Make:  req.Filters.Vehicle.Make,
+				Model: req.Filters.Vehicle.Model,
+				Type:  req.Filters.Vehicle.Type,
+			}
+		}
+
+		message.Filters = filters
+	}
+
+	// Convert sort if provided
+	if req.Sort != nil {
+		message.Sort = &discoverpb.Sort{
+			SortBy: req.Sort.SortBy,
+			Order:  req.Sort.Order,
+		}
 	}
 
 	return &discoverpb.DiscoverRequest{

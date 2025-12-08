@@ -62,5 +62,3 @@ func TestSupportHandler_GetOrderSupport_Success(t *testing.T) {
 	assert.Equal(t, "BlueCharge Support Team", resp.Name)
 	assert.Contains(t, resp.Channels, "phone")
 }
-
-
