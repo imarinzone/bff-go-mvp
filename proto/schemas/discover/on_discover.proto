@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package discover;
+package com.bap.grpc;
 
 option go_package = "bff-go-mvp/proto/discover/gen;discover";
 
@@ -34,7 +34,7 @@ message OnDiscoverMessageResponse {
 // Catalog message
 message Catalog {
   string id = 1;
-  Descriptor descriptor = 2;
+  Descriptor descriptor_data = 2;
   Validity validity = 3;
   repeated Item items = 4;
   repeated Offer offers = 5;
@@ -50,7 +50,7 @@ message Descriptor {
 // Item message
 message Item {
   string id = 1;
-  Descriptor descriptor = 2;
+  Descriptor descriptor_data = 2;
   Category category = 3;
   repeated AvailableAt available_at = 4;
   repeated AvailabilityWindow availability_window = 5;
@@ -104,7 +104,7 @@ message Rating {
 // Provider message
 message Provider {
   string id = 1;
-  Descriptor descriptor = 2;
+  Descriptor descriptor_data = 2;
 }
 
 // ItemAttributes (ChargingService) message
@@ -130,7 +130,7 @@ message ItemAttributes {
 // Offer message
 message Offer {
   string id = 1;
-  Descriptor descriptor = 2;
+  Descriptor descriptor_data = 2;
   repeated string items = 3;
   Price price = 4;
   Validity validity = 5;

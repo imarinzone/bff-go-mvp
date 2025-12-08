@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -60,11 +63,32 @@ func (h *SearchHandler) SearchChargingConnectors(w http.ResponseWriter, r *http.
 		}
 	}
 
+	// Try to decode as DiscoverRequest first (full format with context and message)
+	var discoverReq model.DiscoverRequest
 	var req model.SearchRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.logger.Warn("failed to decode search request", zap.Error(err))
+
+	// Read body once and try both formats
+	bodyBytes, err := readBody(r)
+	if err != nil {
+		h.logger.Warn("failed to read request body", zap.Error(err))
 		httpx.WriteError(w, http.StatusBadRequest, "BAD_REQUEST", "Invalid request body")
 		return
+	}
+
+	// Try DiscoverRequest format first
+	var discoverContext *model.DiscoverContext
+	if err := json.Unmarshal(bodyBytes, &discoverReq); err == nil && discoverReq.Context.Action != "" {
+		// Convert DiscoverRequest to SearchRequest
+		req = convertDiscoverToSearchRequest(discoverReq)
+		// Extract context for passing to service
+		discoverContext = &discoverReq.Context
+	} else {
+		// Fall back to SearchRequest format
+		if err := json.Unmarshal(bodyBytes, &req); err != nil {
+			h.logger.Warn("failed to decode search request", zap.Error(err))
+			httpx.WriteError(w, http.StatusBadRequest, "BAD_REQUEST", "Invalid request body")
+			return
+		}
 	}
 
 	// Validate oneOf: either evse_id or (geo_coordinates + distance_meters)
@@ -81,7 +105,13 @@ func (h *SearchHandler) SearchChargingConnectors(w http.ResponseWriter, r *http.
 		return
 	}
 
-	resp, err := h.service.Search(r.Context(), page, perPage, req)
+	// Add discover context to request context if available
+	ctx := r.Context()
+	if discoverContext != nil {
+		ctx = context.WithValue(ctx, "discover_context", discoverContext)
+	}
+
+	resp, err := h.service.Search(ctx, page, perPage, req)
 	if err != nil {
 		h.logger.Error("search service failed", zap.Error(err))
 		httpx.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "Server error occurred while processing the request.")
@@ -91,4 +121,29 @@ func (h *SearchHandler) SearchChargingConnectors(w http.ResponseWriter, r *http.
 	// Set mock transaction id header for now
 	w.Header().Set("X-Transaction-Id", "mock-transaction-id")
 	httpx.WriteJSON(w, http.StatusOK, resp)
+}
+
+// readBody reads the request body and returns it as bytes
+// It also restores the body so it can be read again if needed
+func readBody(r *http.Request) ([]byte, error) {
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		return nil, err
+	}
+	r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+	return bodyBytes, nil
+}
+
+// convertDiscoverToSearchRequest converts a DiscoverRequest to SearchRequest
+func convertDiscoverToSearchRequest(discoverReq model.DiscoverRequest) model.SearchRequest {
+	req := model.SearchRequest{
+		DistanceMeters: discoverReq.Message.DistanceMeters,
+	}
+
+	// Extract coordinates from geometry if present
+	if discoverReq.Message.Geometry != nil && len(discoverReq.Message.Geometry.Coordinates) >= 2 {
+		req.GeoCoordinates = discoverReq.Message.Geometry.Coordinates[:2]
+	}
+
+	return req
 }

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package discover;
+package com.bap.grpc;
 
 import "discover/discover.proto";
 import "discover/on_discover.proto";
@@ -8,6 +8,6 @@ import "discover/on_discover.proto";
 option go_package = "bff-go-mvp/proto/discover/gen;discover";
 
 // Discover service definition
-service DiscoverService {
+service DiscoveryService {
   rpc Discover(DiscoverRequest) returns (OnDiscoverResponse);
 }

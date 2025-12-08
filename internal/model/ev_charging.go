@@ -144,6 +144,37 @@ type TimeWindow struct {
 	End   string `json:"end,omitempty"`
 }
 
+// DiscoverRequest represents the full discover request format with context and message
+type DiscoverRequest struct {
+	Context DiscoverContext `json:"context"`
+	Message DiscoverMessage `json:"message"`
+}
+
+// DiscoverContext represents the context in a discover request
+type DiscoverContext struct {
+	TransactionID string `json:"transaction_id"`
+	Version       string `json:"version"`
+	Action        string `json:"action"`
+	Domain        string `json:"domain"`
+	BapID         string `json:"bap_id"`
+	BapURI        string `json:"bap_uri"`
+	MessageID     string `json:"message_id"`
+	Timestamp     string `json:"timestamp"`
+	TTL           string `json:"ttl"`
+}
+
+// DiscoverMessage represents the message payload in a discover request
+type DiscoverMessage struct {
+	Geometry       *Geometry `json:"geometry,omitempty"`
+	DistanceMeters float64   `json:"distance_meters,omitempty"`
+}
+
+// Geometry represents a geometry object
+type Geometry struct {
+	Type        string    `json:"type"`
+	Coordinates []float64 `json:"coordinates"`
+}
+
 type SearchRequest struct {
 	EvseID         string         `json:"evse_id,omitempty"`
 	GeoCoordinates []float64      `json:"geo_coordinates,omitempty"`

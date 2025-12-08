@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package select_;
+
+import "select/select.proto";
+import "select/on_select.proto";
+
+option go_package = "bff-go-mvp/proto/select/gen;select_";
+
+// Select service definition
+service SelectService {
+  rpc Select(SelectRequest) returns (OnSelectResponse);
+}
+

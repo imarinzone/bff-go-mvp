@@ -73,7 +73,7 @@ func New(cfg *config.Config, logger *zap.Logger) *mux.Router {
 
 func chooseSearchService(cfg *config.Config, logger *zap.Logger) search.Service {
 	// Create gRPC client for discover service
-	grpcClient, err := grpc.NewDiscoverClient(cfg.GRPC.DiscoverServiceAddress)
+	grpcClient, err := grpc.NewDiscoverClient(cfg.GRPC.ServiceAddress)
 	if err != nil {
 		logger.Error("Failed to create gRPC discover client, falling back to mock", zap.Error(err))
 		return search.NewMockService()
@@ -87,9 +87,18 @@ func chooseSearchService(cfg *config.Config, logger *zap.Logger) search.Service 
 }
 
 func chooseEstimateService(cfg *config.Config, logger *zap.Logger) estimate.Service {
-	_ = logger
-	_ = cfg
-	return estimate.NewMockService()
+	// Create gRPC client for select service
+	grpcClient, err := grpc.NewSelectClient(cfg.GRPC.ServiceAddress)
+	if err != nil {
+		logger.Error("Failed to create gRPC select client, falling back to mock", zap.Error(err))
+		return estimate.NewMockService()
+	}
+
+	// Create gRPC service with fallback to mock on errors
+	grpcService := estimate.NewGRPCService(grpcClient, logger)
+	mockService := estimate.NewMockService()
+	// Wrap with fallback: if gRPC fails, use mock service
+	return estimate.NewFallbackService(grpcService, mockService, logger)
 }
 
 func choosePaymentService(cfg *config.Config, logger *zap.Logger) payment.Service {
