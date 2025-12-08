@@ -12,7 +12,7 @@ import (
 // DiscoverClient represents a gRPC client for discover service
 type DiscoverClient struct {
 	conn   *grpc.ClientConn
-	client discoverpb.DiscoverServiceClient
+	client discoverpb.DiscoveryServiceClient
 }
 
 // NewDiscoverClient creates a new gRPC discover client
@@ -25,7 +25,7 @@ func NewDiscoverClient(address string) (*DiscoverClient, error) {
 		return nil, err
 	}
 
-	client := discoverpb.NewDiscoverServiceClient(conn)
+	client := discoverpb.NewDiscoveryServiceClient(conn)
 
 	return &DiscoverClient{
 		conn:   conn,

@@ -28,8 +28,16 @@ func NewGRPCService(client *grpc.DiscoverClient, logger *zap.Logger) *GRPCServic
 
 // Search implements the search.Service interface
 func (s *GRPCService) Search(ctx context.Context, page, perPage int, req model.SearchRequest) (model.SearchResponse, error) {
+	// Extract context from the request context if available
+	var discoverContext *model.DiscoverContext
+	if ctxVal := ctx.Value("discover_context"); ctxVal != nil {
+		if dc, ok := ctxVal.(*model.DiscoverContext); ok {
+			discoverContext = dc
+		}
+	}
+
 	// Convert model request to proto request
-	protoReq := s.modelToProtoRequest(req)
+	protoReq := s.modelToProtoRequest(req, discoverContext)
 
 	// Call gRPC service
 	protoResp, err := s.client.Discover(ctx, protoReq)
@@ -43,23 +51,62 @@ func (s *GRPCService) Search(ctx context.Context, page, perPage int, req model.S
 }
 
 // modelToProtoRequest converts model.SearchRequest to proto DiscoverRequest
-func (s *GRPCService) modelToProtoRequest(req model.SearchRequest) *discoverpb.DiscoverRequest {
-	// Generate IDs
-	transactionID := uuid.New().String()
-	messageID := uuid.New().String()
-	timestamp := time.Now().UTC().Format(time.RFC3339)
+func (s *GRPCService) modelToProtoRequest(req model.SearchRequest, discoverContext *model.DiscoverContext) *discoverpb.DiscoverRequest {
+	// Use provided context values or generate defaults
+	var version, action, domain, bapID, bapURI, transactionID, messageID, timestamp, ttl string
+
+	if discoverContext != nil {
+		version = discoverContext.Version
+		action = discoverContext.Action
+		domain = discoverContext.Domain
+		bapID = discoverContext.BapID
+		bapURI = discoverContext.BapURI
+		transactionID = discoverContext.TransactionID
+		messageID = discoverContext.MessageID
+		timestamp = discoverContext.Timestamp
+		ttl = discoverContext.TTL
+	}
+
+	// Use defaults if not provided
+	if version == "" {
+		version = VersionDefault
+	}
+	if action == "" {
+		action = ActionDiscover
+	}
+	if domain == "" {
+		domain = DomainDefault
+	}
+	if bapID == "" {
+		bapID = BapIDDefault
+	}
+	if bapURI == "" {
+		bapURI = BapURIDefault
+	}
+	if transactionID == "" {
+		transactionID = uuid.New().String()
+	}
+	if messageID == "" {
+		messageID = uuid.New().String()
+	}
+	if timestamp == "" {
+		timestamp = time.Now().UTC().Format(time.RFC3339)
+	}
+	if ttl == "" {
+		ttl = TTLDefault
+	}
 
 	// Build context
 	context := &discoverpb.Context{
-		Version:       VersionDefault,
-		Action:        ActionDiscover,
-		Domain:        DomainDefault,
-		BapId:         BapIDDefault,
-		BapUri:        BapURIDefault,
+		Version:       version,
+		Action:        action,
+		Domain:        domain,
+		BapId:         bapID,
+		BapUri:        bapURI,
 		TransactionId: transactionID,
 		MessageId:     messageID,
 		Timestamp:     timestamp,
-		Ttl:           TTLDefault,
+		Ttl:           ttl,
 	}
 
 	// Build message
@@ -114,11 +161,11 @@ func (s *GRPCService) protoCatalogToModel(protoCatalog *discoverpb.Catalog) mode
 	}
 
 	// Convert provider
-	if protoCatalog.GetDescriptor_() != nil {
+	if protoCatalog.GetDescriptorData() != nil {
 		catalog.Provider = model.Provider{
 			ID: protoCatalog.GetId(), // Using catalog ID as provider ID fallback
 			Descriptor: model.ProviderDescriptor{
-				Name: protoCatalog.GetDescriptor_().GetName(),
+				Name: protoCatalog.GetDescriptorData().GetName(),
 			},
 		}
 	}
@@ -206,9 +253,9 @@ func (s *GRPCService) protoOfferToModel(protoOffer *discoverpb.Offer) model.Offe
 	}
 
 	// Convert descriptor
-	if protoOffer.GetDescriptor_() != nil {
+	if protoOffer.GetDescriptorData() != nil {
 		offer.Descriptor = model.OfferDescriptor{
-			Name: protoOffer.GetDescriptor_().GetName(),
+			Name: protoOffer.GetDescriptorData().GetName(),
 		}
 	}
 

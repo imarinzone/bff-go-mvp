@@ -1,4 +1,4 @@
-package search
+package estimate
 
 import (
 	"context"
@@ -24,12 +24,13 @@ func NewFallbackService(primary, fallback Service, logger *zap.Logger) *Fallback
 	}
 }
 
-// Search implements the Service interface with fallback logic
-func (s *FallbackService) Search(ctx context.Context, page, perPage int, req model.SearchRequest) (model.SearchResponse, error) {
-	resp, err := s.primary.Search(ctx, page, perPage, req)
+// Estimate implements the Service interface with fallback logic
+func (s *FallbackService) Estimate(ctx context.Context, req model.EstimateRequest) (model.EstimateResponse, error) {
+	resp, err := s.primary.Estimate(ctx, req)
 	if err != nil {
-		s.logger.Warn("Primary service failed, falling back to secondary service", zap.Any("response", resp), zap.Error(err))
-		return s.fallback.Search(ctx, page, perPage, req)
+		s.logger.Warn("Primary service failed, falling back to secondary service", zap.Error(err))
+		return s.fallback.Estimate(ctx, req)
 	}
 	return resp, nil
 }
+

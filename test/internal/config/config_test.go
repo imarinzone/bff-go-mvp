@@ -9,15 +9,15 @@ import (
 
 func TestLoad(t *testing.T) {
 	// Save original env values
-	originalDiscoverAddr := os.Getenv("DISCOVER_SERVICE_ADDRESS")
+	originalServiceAddr := os.Getenv("GRPC_SERVICE_ADDRESS")
 	originalPort := os.Getenv("API_PORT")
 
 	// Clean up after test
 	defer func() {
-		if originalDiscoverAddr != "" {
-			os.Setenv("DISCOVER_SERVICE_ADDRESS", originalDiscoverAddr)
+		if originalServiceAddr != "" {
+			os.Setenv("GRPC_SERVICE_ADDRESS", originalServiceAddr)
 		} else {
-			os.Unsetenv("DISCOVER_SERVICE_ADDRESS")
+			os.Unsetenv("GRPC_SERVICE_ADDRESS")
 		}
 		if originalPort != "" {
 			os.Setenv("API_PORT", originalPort)
@@ -28,20 +28,20 @@ func TestLoad(t *testing.T) {
 
 	// Test with defaults
 	cfg := config.Load()
-	if cfg.GRPC.DiscoverServiceAddress != "localhost:8081" {
-		t.Errorf("Expected default discover service address 'localhost:8081', got '%s'", cfg.GRPC.DiscoverServiceAddress)
+	if cfg.GRPC.ServiceAddress != "localhost:9090" {
+		t.Errorf("Expected default service address 'localhost:9090', got '%s'", cfg.GRPC.ServiceAddress)
 	}
 	if cfg.API.Port != "8000" {
 		t.Errorf("Expected default API port '8000', got '%s'", cfg.API.Port)
 	}
 
 	// Test with environment variables
-	os.Setenv("DISCOVER_SERVICE_ADDRESS", "custom-discover:8082")
+	os.Setenv("GRPC_SERVICE_ADDRESS", "custom-service:8082")
 	os.Setenv("API_PORT", "9090")
 
 	cfg = config.Load()
-	if cfg.GRPC.DiscoverServiceAddress != "custom-discover:8082" {
-		t.Errorf("Expected discover service address 'custom-discover:8082', got '%s'", cfg.GRPC.DiscoverServiceAddress)
+	if cfg.GRPC.ServiceAddress != "custom-service:8082" {
+		t.Errorf("Expected service address 'custom-service:8082', got '%s'", cfg.GRPC.ServiceAddress)
 	}
 	if cfg.API.Port != "9090" {
 		t.Errorf("Expected API port '9090', got '%s'", cfg.API.Port)

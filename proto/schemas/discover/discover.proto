@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package discover;
+package com.bap.grpc;
 
 option go_package = "bff-go-mvp/proto/discover/gen;discover";
 
