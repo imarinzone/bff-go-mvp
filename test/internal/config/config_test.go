@@ -17,7 +17,7 @@ func TestLoad(t *testing.T) {
 		if originalServiceAddr != "" {
 			os.Setenv("GRPC_SERVICE_ADDRESS", originalServiceAddr)
 		} else {
-			os.Unsetenv("DISCOVER_SERVICE_ADDRESS")
+			os.Unsetenv("GRPC_SERVICE_ADDRESS")
 		}
 		if originalPort != "" {
 			os.Setenv("API_PORT", originalPort)

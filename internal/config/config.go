@@ -12,7 +12,7 @@ type Config struct {
 
 // GRPCConfig holds gRPC client configuration
 type GRPCConfig struct {
-	DiscoverServiceAddress string
+	ServiceAddress string
 }
 
 // APIConfig holds API server configuration

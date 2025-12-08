@@ -12,4 +12,3 @@ service SelectService {
   rpc Select(SelectRequest) returns (OnSelectResponse);
 }
 
-
