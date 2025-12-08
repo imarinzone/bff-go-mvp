@@ -31,5 +31,3 @@ func (s *MockService) SetRating(ctx context.Context, orderID string, req model.R
 		},
 	}, nil
 }
-
-

@@ -10,5 +10,3 @@ import (
 type Service interface {
 	GetSupport(ctx context.Context, orderID string) (model.SupportResponse, error)
 }
-
-

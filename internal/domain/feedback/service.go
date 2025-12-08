@@ -10,5 +10,3 @@ import (
 type Service interface {
 	SetRating(ctx context.Context, orderID string, req model.RatingRequest) (model.RatingResponse, error)
 }
-
-

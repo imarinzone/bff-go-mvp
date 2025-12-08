@@ -51,5 +51,3 @@ func TestOrdersHandler_GetOrder_MissingHeaders(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
-
-

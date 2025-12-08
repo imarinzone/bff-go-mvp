@@ -28,10 +28,42 @@ message Context {
 message Message {
   Geometry geometry = 1;
   double distance_meters = 2;
+  string evse_id = 3;
+  TimeWindow time_window = 4;
+  Filters filters = 5;
+  Sort sort = 6;
 }
 
 // Geometry for spatial queries
 message Geometry {
   string type = 1;
   repeated double coordinates = 2;
+}
+
+// TimeWindow for time-based filtering
+message TimeWindow {
+  string start = 1;
+  string end = 2;
+}
+
+// Filters for search filtering
+message Filters {
+  string cpo = 1;
+  string connector_type = 2;
+  double max_power_kw = 3;
+  repeated string amenities = 4;
+  Vehicle vehicle = 5;
+}
+
+// Vehicle information for filtering
+message Vehicle {
+  string make = 1;
+  string model = 2;
+  string type = 3;
+}
+
+// Sort options for search results
+message Sort {
+  string sort_by = 1;
+  string order = 2;
 }

@@ -75,5 +75,3 @@ func (s *MockService) GetOrder(ctx context.Context, orderID string) (model.Order
 		},
 	}, nil
 }
-
-

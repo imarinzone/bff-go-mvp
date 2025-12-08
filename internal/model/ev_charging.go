@@ -128,7 +128,7 @@ type Vehicle struct {
 type SearchFilters struct {
 	CPO           string   `json:"cpo,omitempty"`
 	ConnectorType string   `json:"connector_type,omitempty"`
-	MaxPowerKW    float64  `json:"max_power_kw,omitempty"`
+	MaxPowerKW    *float64 `json:"max_power_kw,omitempty"`
 	Amenities     []string `json:"amenities,omitempty"`
 	Vehicle       *Vehicle `json:"vehicle,omitempty"`
 }

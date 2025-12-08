@@ -221,5 +221,3 @@ func (s *MockLifecycleService) Start(ctx context.Context, orderID string, req mo
 		},
 	}, nil
 }
-
-

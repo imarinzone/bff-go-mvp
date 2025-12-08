@@ -36,5 +36,3 @@ func (s *MockService) GetSupport(ctx context.Context, orderID string) (model.Sup
 		},
 	}, nil
 }
-
-
