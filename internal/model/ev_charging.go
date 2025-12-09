@@ -39,7 +39,6 @@ type ProviderDescriptor struct {
 type Provider struct {
 	ID         string             `json:"id"`
 	Descriptor ProviderDescriptor `json:"descriptor"`
-	Address    Address            `json:"address"`
 }
 
 type ConnectorAttributes struct {
@@ -61,10 +60,9 @@ type ConnectorAttributes struct {
 }
 
 type Connector struct {
-	ID                  string               `json:"id"`
-	IsActive            bool                 `json:"isActive"`
-	AvailabilityWindow  []AvailabilityWindow `json:"availabilityWindow,omitempty"`
-	ConnectorAttributes ConnectorAttributes  `json:"connectorAttributes"`
+	ID                  string              `json:"id"`
+	IsActive            bool                `json:"isActive"`
+	ConnectorAttributes ConnectorAttributes `json:"connectorAttributes"`
 }
 
 type BuyerFinderFee struct {
@@ -110,11 +108,14 @@ type Offer struct {
 }
 
 type Catalog struct {
-	ID         string      `json:"id"`
-	Provider   Provider    `json:"provider"`
-	Rating     *Rating     `json:"rating,omitempty"`
-	Connectors []Connector `json:"connectors"`
-	Offers     []Offer     `json:"offers"`
+	ID                 string               `json:"id"`
+	Provider           Provider             `json:"provider"`
+	Address            Address              `json:"address"`
+	Rating             *Rating              `json:"rating,omitempty"`
+	AvailabilityWindow []AvailabilityWindow `json:"availabilityWindow,omitempty"`
+	AvailablePowerType []string             `json:"availablePowerType"`
+	Connectors         []Connector          `json:"connectors"`
+	Offers             []Offer              `json:"offers"`
 }
 
 // --- Search API models ---
