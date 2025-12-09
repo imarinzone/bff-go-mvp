@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package init_;
+
+import "init/init.proto";
+import "init/on_init.proto";
+
+option go_package = "bff-go-mvp/proto/init/gen;init_";
+
+// Init service definition
+service InitService {
+  rpc Init(InitRequest) returns (OnInitResponse);
+}
+
