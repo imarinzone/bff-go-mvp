@@ -23,7 +23,7 @@ test:
 # Generate protobuf code
 generate:
 	@echo "Generating protobuf code..."
-	@mkdir -p proto/discover/gen proto/select/gen
+	@mkdir -p proto/discover/gen proto/select/gen proto/init/gen
 	@PATH=$$(go env GOPATH)/bin:$$PATH protoc --proto_path=proto/schemas \
 		--go_out=proto/discover/gen \
 		--go_opt=paths=source_relative \
@@ -46,6 +46,17 @@ generate:
 		--go-grpc_out=proto/select/gen \
 		--go-grpc_opt=paths=source_relative \
 		proto/schemas/select/select_service.proto
+	@PATH=$$(go env GOPATH)/bin:$$PATH protoc --proto_path=proto/schemas \
+		--go_out=proto/init/gen \
+		--go_opt=paths=source_relative \
+		proto/schemas/init/init.proto \
+		proto/schemas/init/on_init.proto
+	@PATH=$$(go env GOPATH)/bin:$$PATH protoc --proto_path=proto/schemas \
+		--go_out=proto/init/gen \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=proto/init/gen \
+		--go-grpc_opt=paths=source_relative \
+		proto/schemas/init/init_service.proto
 
 # Generate Swagger docs using swaggo
 swagger:
@@ -61,7 +72,7 @@ swagger-clean:
 clean:
 	@echo "Cleaning..."
 	@rm -rf bin/
-	@rm -rf proto/discover/gen proto/select/gen
+	@rm -rf proto/discover/gen proto/select/gen proto/init/gen
 
 # Install dependencies
 deps:

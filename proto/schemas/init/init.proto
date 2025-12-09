@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package init_;
+
+option go_package = "bff-go-mvp/proto/init/gen;init_";
+
+// Init request matching the beckn protocol structure
+message InitRequest {
+  Context context = 1;
+  Message message = 2;
+}
+
+// Context message for init request
+// Contains both BAP (Buyer App) and BPP (Buyer Provider Platform) information
+message Context {
+  string version = 1;
+  string action = 2;
+  string domain = 3;
+  string timestamp = 4;
+  string message_id = 5;
+  string transaction_id = 6;
+  string bap_id = 7;
+  string bap_uri = 8;
+  string ttl = 9;
+  string bpp_id = 10;
+  string bpp_uri = 11;
+}
+
+// Message containing init parameters
+message Message {
+  string evse_id = 1;
+  Vehicle vehicle = 2;
+  string connector_id = 3;
+  TimeWindow time_window = 4;
+  Energy energy = 5;
+  string offer_id = 6;
+  Amount amount = 7;
+  Buyer buyer = 8;
+  SessionPreferences session_preferences = 9;
+}
+
+// Vehicle information
+message Vehicle {
+  string make = 1;
+  string model = 2;
+  string type = 3;
+}
+
+// Time window for charging
+message TimeWindow {
+  string start = 1;
+  string end = 2;
+}
+
+// Energy information
+message Energy {
+  double value = 1;
+  string unit = 2;
+}
+
+// Amount information
+message Amount {
+  double value = 1;
+  string currency = 2;
+}
+
+// Buyer information
+message Buyer {
+  string id = 1;
+  string role = 2;
+  string name = 3;
+  Organization organization = 4;
+  string address = 5;
+  string email = 6;
+  string phone = 7;
+  string tax_id = 8;
+}
+
+// Organization information
+message Organization {
+  Descriptor descriptor = 1;
+}
+
+// Descriptor
+message Descriptor {
+  string name = 1;
+}
+
+// Session preferences
+message SessionPreferences {
+  string preferred_start_time = 1;
+  string preferred_end_time = 2;
+  NotificationPreferences notification_preferences = 3;
+}
+
+// Notification preferences
+message NotificationPreferences {
+  bool email = 1;
+  bool sms = 2;
+  bool push = 3;
+}
+
