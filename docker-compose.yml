@@ -6,11 +6,11 @@ services:
       dockerfile: Dockerfile.api
     container_name: bff-api
     ports:
-      - "8080:8080"
+      - "8000:8000"
     environment:
       - ENV=production
       - GRPC_SERVICE_ADDRESS=localhost:50051
-      - API_PORT=8080
+      - API_PORT=8000
     networks:
       - bff-network
     restart: unless-stopped

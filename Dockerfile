@@ -1,5 +1,12 @@
+# Multi-platform build arguments (BuildKit feature)
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
 # Build stage
-FROM golang:1.24-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS builder
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
 WORKDIR /app
 
@@ -17,7 +24,11 @@ RUN GOTOOLCHAIN=auto go mod download
 COPY . .
 
 # Build the API server
-RUN CGO_ENABLED=0 GOOS=linux GOTOOLCHAIN=auto go build -a -installsuffix cgo -o bin/api ./cmd/api
+# Parse TARGETPLATFORM to set GOOS and GOARCH
+RUN TARGETOS=$(echo ${TARGETPLATFORM} | cut -d '/' -f1) && \
+    TARGETARCH=$(echo ${TARGETPLATFORM} | cut -d '/' -f2) && \
+    CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} GOTOOLCHAIN=auto \
+    go build -a -installsuffix cgo -o bin/api ./cmd/api
 
 # Final stage
 FROM alpine:latest
@@ -33,4 +44,3 @@ EXPOSE 8080
 
 # Run the API server
 CMD ["./api"]
-
