@@ -15,7 +15,7 @@ func NewMockService() *MockService {
 }
 
 func (s *MockService) Search(ctx context.Context, page, perPage int, req model.SearchRequest) (model.SearchResponse, error) {
-	// Static mock response matching the desired structure.
+	// Static mock response based on swagger.yaml example.
 	resp := model.SearchResponse{
 		Total:   1,
 		Page:    page,
@@ -28,28 +28,27 @@ func (s *MockService) Search(ctx context.Context, page, perPage int, req model.S
 					Descriptor: model.ProviderDescriptor{
 						Name: "EcoPower Charging Pvt Ltd",
 					},
-				},
-				Address: model.Address{
-					Name:           "MG JVLR Jogeshwari Caves Road",
-					GeoCoordinates: []float64{12.9716, 77.5946},
+					Address: model.Address{
+						Name:           "MG JVLR Jogeshwari Caves Road",
+						GeoCoordinates: []float64{12.9716, 77.5946},
+					},
 				},
 				Rating: &model.Rating{
 					Value: 4.5,
 					Count: 128,
 				},
-				AvailabilityWindow: []model.AvailabilityWindow{
-					{
-						StartTime: "06:00:00",
-						EndTime:   "22:00:00",
-					},
-				},
-				AvailablePowerType: []string{"DC", "AC"},
 				Connectors: []model.Connector{
 					{
 						ID:       "ev-charger-ccs2-001",
 						IsActive: true,
+						AvailabilityWindow: []model.AvailabilityWindow{
+							{
+								StartTime: "06:00:00",
+								EndTime:   "22:00:00",
+							},
+						},
 						ConnectorAttributes: model.ConnectorAttributes{
-							ConnectorType:        "TYPE 2",
+							ConnectorType:        "TYPE_2",
 							MaxPowerKW:           60,
 							MinPowerKW:           5,
 							SocketCount:          2,
@@ -100,3 +99,5 @@ func (s *MockService) Search(ctx context.Context, page, perPage int, req model.S
 
 	return resp, nil
 }
+
+
